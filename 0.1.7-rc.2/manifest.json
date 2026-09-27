@@ -1,0 +1,54 @@
+{
+  "dsh": {
+    "package": "@deepseek-ai/dsh",
+    "version": "0.1.7-rc.2"
+  },
+  "install": {
+    "pnpmArgs": [
+      "--ignore-scripts",
+      "--node-linker=hoisted"
+    ],
+    "extraPackages": [
+      "@deepseek-ai/node-addon-system-openharmony-arm64@0.1.2",
+      "@vscode/ripgrep-openharmony-arm64@1.18.0"
+    ],
+    "note": "沙箱里装不了原生模块（node-pty/koffi 的 node-gyp 失败），所以必须 --ignore-scripts；布局用 hoisted 以对齐壳的解包方式"
+  },
+  "replace": [
+    {
+      "path": "node_modules/@deepseek-ai/dsh-api-session-controller/lib/index.js",
+      "sha256": "c97c617be67ce4b7f564e2e2a4a6a587e27c0a96cd144662932f2108f4e7140d",
+      "upstreamSha256": null,
+      "bytes": 124691
+    },
+    {
+      "path": "node_modules/@deepseek-ai/dsh-client-ui-conversation/lib/client.js",
+      "sha256": "7f1b54e76060c01cf91f0d4c893657ad60fa88f0c5c5a4aefe42747d9b734159",
+      "upstreamSha256": null,
+      "bytes": 714907
+    },
+    {
+      "path": "node_modules/@deepseek-ai/dsh-client-ui-settings-account/lib/client.js",
+      "sha256": "a83b6ac0d25934726d0050e9fd6c6515effe3c5732e2a713b47779368c743332",
+      "upstreamSha256": null,
+      "bytes": 5279193
+    },
+    {
+      "path": "node_modules/@deepseek-ai/dsh-attachment-local/lib/index.js",
+      "sha256": "df26e1fb7cbaf8f6bfde2a0207a75fc401f53a9a4cff205ffd4b5f8e5a2f69f8",
+      "upstreamSha256": null,
+      "bytes": 63549
+    }
+  ],
+  "imageBackend": {
+    "source": "image-backend/node_modules",
+    "target": "node_modules/@deepseek-ai/dsh-attachment-local/node_modules",
+    "files": 270
+  },
+  "binAlias": {
+    "note": "pnpm hoisted 生成的是 node_modules/.bin/，壳里用的是 node_modules/bin/（无点）—— 打包时改名/复制",
+    "from": "node_modules/.bin",
+    "to": "node_modules/bin"
+  },
+  "plugins": []
+}
