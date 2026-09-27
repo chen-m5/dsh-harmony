@@ -29,9 +29,10 @@ const out = outArg >= 0 ? resolve(args[outArg + 1]) : join(ROOT, `dsh-ohos-${ver
 const manifestPath = join(ROOT, version, 'manifest.json')
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
 // work/<版本>/         = fetch 出来的**官方原样**树（只读，别动它）
-// work/<版本>-build/   = 每次 build 从上面拷一份副本，替换/加资产都在副本上做 → build 可反复跑
+// work/.build-<版本>/  = 每次 build 从上面拷一份副本，替换/加资产都在副本上做 → build 可反复跑
+//   （目录名刻意不以 <版本> 开头：node 的 cpSync 按前缀判断嵌套，"<版本>-build" 会被误判成 "<版本>" 的子目录）
 const workSource = join(ROOT, 'work', version)
-const work = join(ROOT, 'work', `${version}-build`)
+const work = join(ROOT, 'work', `.build-${version}`)
 const sha256 = p => { const h = createHash('sha256'); h.update(readFileSync(p)); return h.digest('hex') }
 const fail = msg => { console.error(`  ✗ ${msg}`); process.exit(1) }
 
