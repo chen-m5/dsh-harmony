@@ -9,18 +9,24 @@
 ## 目录
 
 ```
-scripts/
-  fetch-dsh.mjs      拉取并安装指定版本的官方 dsh（含 OHOS 原生包；--ignore-scripts --node-linker=hoisted）
-  build-dsh.mjs      校验 manifest → 替换 files/ → 装图片后端 → 放插件 → 生成 bin/ → 打包 zip → 自检
-  verify-dsh.mjs     产物自检（zip 顶层 dsh-<版本>/、文件集合、关键文件 sha256、补丁标记）
-<版本>/               每个 dsh 版本一套（如 0.1.7-rc.2/）
-  manifest.json      上游版本 + 要替换/新增的东西 + sha256 校验清单
-  files/             ★ 改造过的文件（保留包内相对路径，如 node_modules/@deepseek-ai/<包>/lib/x.js）
-  image-backend/     ★ 图片处理后端（jimp 依赖闭包，替换 sharp）
-  plugins/           ★ 新增/替换的 dsh 插件（每插件一目录 + plugins.json）
-  CHANGES.md         ★ 这个版本改了什么、为什么
-patches/             历史补丁原件（留档；现在由 files/ 整文件替换取代）
+scripts/                    顶层：**共用件**
+  fetch-dsh.mjs             薄转发入口 → <版本>/scripts/fetch-dsh.mjs
+  build-dsh.mjs             薄转发入口 → <版本>/scripts/build-dsh.mjs
+  verify-dsh.mjs            薄转发入口 → <版本>/scripts/verify-dsh.mjs
+  trim-jimp.mjs             通用工具：裁剪 jimp 依赖闭包
+<版本>/                     **每个 dsh 版本一套，互不影响**（如 0.1.7-rc.2/）
+  scripts/                  ★ 这一版**独立**的脚本（权威实现；下个版本可能不一样）
+  patches/                  ★ 这一版**独立**的补丁留档（+ jimp-deps.json）
+  manifest.json             上游版本 + 替换/资产清单 + sha256 校验基线
+  files/                    ★ 改造过的文件（保留包内相对路径，如 node_modules/@deepseek-ai/<包>/lib/x.js）
+  image-backend/            ★ 图片后端（jimp 依赖闭包，替换掉 OHOS 上用不了的 sharp）
+  native/                   ★ OHOS(openharmony-arm64) 平台专用包（公共 registry 上没有）
+  bin/                      ★ 壳要用的顶层 bin/（bash shim）
+  plugins/                  ★ 新增/替换的 dsh 插件（每插件一目录 + plugins.json）
+  CHANGES.md                ★ 这个版本改了什么、为什么
 ```
+
+约定：**每个版本自带独立脚本**；确实共用的东西放顶层 `scripts/`，其它版本要用就 **import 它的路径（引用，而不是复制）**。
 
 ## 用法
 
