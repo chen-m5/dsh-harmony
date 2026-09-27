@@ -100,7 +100,16 @@ if (args.includes('--refresh-sha')) {
   if (n > 0) { writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n'); console.log(`  ✓ 已刷新 ${n} 项 sha256`) }
 }
 
-if (!existsSync(join(workSource, 'node_modules/@deepseek-ai/dsh/lib/bin.js'))) fail(`work/${version}/ 里没有官方 dsh，先跑: node scripts/fetch-dsh.mjs ${version}`)
+if (!existsSync(join(workSource, 'node_modules/@deepseek-ai/dsh/lib/bin.js'))) {
+  // 常见于刚跑过 --clean：自动补一次 fetch（有 lock，约 10 秒）；失败就给出清晰提示
+  console.log(`== work/${version}/ 不在（可能被 --clean 清了），自动先 fetch ==`)
+  try {
+    execFileSync(process.execPath, [join(ROOT, version, 'scripts', 'fetch-dsh.mjs'), version], { stdio: 'inherit' })
+  } catch {
+    fail(`自动 fetch 失败（多半是找不到 pnpm）。先手动跑:\n      PNPM_CMD="node <pnpm.cjs>" node ${version}/scripts/fetch-dsh.mjs ${version}`)
+  }
+  if (!existsSync(join(workSource, 'node_modules/@deepseek-ai/dsh/lib/bin.js'))) fail(`fetch 之后仍然没有 work/${version}/`)
+}
 console.log(`== 0/6 复制官方树 → work/.build-${version}/（保持官方原样可反复 build）==`)
 rmSync(work, { recursive: true, force: true })
 cpSync(workSource, work, { recursive: true })

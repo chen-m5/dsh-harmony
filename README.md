@@ -44,7 +44,7 @@ node scripts/verify-dsh.mjs dsh-ohos-0.1.7-rc.2.zip
 ## 清理中间产物
 
 打包会在 `work/` 下留缓存（`work/<版本>/` 官方树、`work/.build-<版本>/` 构建副本，合计约 900 MB），
-它们**可以随时删**，下次 build 会按 `pnpm-lock.yaml` 重新拉（约 10 秒）：
+它们**可以随时删**；下次 build 会发现官方树不在、**自动 fetch** 一次（按 `pnpm-lock.yaml`，约 10 秒）：
 
 ```sh
 node scripts/build-dsh.mjs <版本> --clean     # 只清理，不构建
