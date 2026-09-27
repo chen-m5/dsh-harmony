@@ -25,9 +25,9 @@
     },
     {
       "path": "node_modules/@deepseek-ai/dsh-client-ui-settings-account/lib/client.js",
-      "sha256": "0b86fa2451e2998098daeb6f029cd20201d8a6e85d3d742240866ca81f2a1238",
+      "sha256": "c9c769582442c10b4dafa3d49c580c813a7b499cda6b05eda10aea02dfdcb9ff",
       "upstreamSha256": "e9b6ce9412d18b4e6ec1af0a79b523c884a566fb7c48425349398f80d3d90791",
-      "bytes": 5279193
+      "bytes": 5281400
     },
     {
       "path": "node_modules/@deepseek-ai/dsh-attachment-local/lib/index.js",
