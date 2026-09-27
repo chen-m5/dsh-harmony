@@ -24,6 +24,22 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const args = process.argv.slice(2)
 const version = args.find(a => !a.startsWith('--'))
 if (!version) { console.error('用法: node scripts/build-dsh.mjs <版本> [--out <zip>]'); process.exit(1) }
+
+// --clean：清掉打包中间产物（work/<版本>/ 官方树 与 work/.build-<版本>/ 构建副本）
+// 它们只是缓存，可随时删；下次 build 需要先重新 fetch（有 lock，约 10 秒）。
+if (args.includes('--clean')) {
+  const targets = [join(ROOT, 'work', version), join(ROOT, 'work', `.build-${version}`)]
+  let freed = 0
+  for (const dir of targets) {
+    if (!existsSync(dir)) continue
+    const size = execFileSync('du', ['-sk', dir], { encoding: 'utf8' }).split('\t')[0]
+    rmSync(dir, { recursive: true, force: true })
+    freed += Number(size)
+    console.log(`  · 删除 ${dir.replace(ROOT + '/', '')}`)
+  }
+  console.log(`  ✓ 清理完成，释放约 ${(freed / 1024).toFixed(0)} MB`)
+  process.exit(0)
+}
 const outArg = args.indexOf('--out')
 const out = outArg >= 0 ? resolve(args[outArg + 1]) : join(ROOT, `dsh-ohos-${version}.zip`)
 const manifestPath = join(ROOT, version, 'manifest.json')
