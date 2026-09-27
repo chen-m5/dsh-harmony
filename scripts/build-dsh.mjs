@@ -27,11 +27,17 @@ const outArg = args.indexOf('--out')
 const out = outArg >= 0 ? resolve(args[outArg + 1]) : join(ROOT, `dsh-ohos-${version}.zip`)
 const manifestPath = join(ROOT, version, 'manifest.json')
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
-const work = join(ROOT, 'work', version)
+// work/<版本>/         = fetch 出来的**官方原样**树（只读，别动它）
+// work/<版本>-build/   = 每次 build 从上面拷一份副本，替换/加资产都在副本上做 → build 可反复跑
+const workSource = join(ROOT, 'work', version)
+const work = join(ROOT, 'work', `${version}-build`)
 const sha256 = p => { const h = createHash('sha256'); h.update(readFileSync(p)); return h.digest('hex') }
 const fail = msg => { console.error(`  ✗ ${msg}`); process.exit(1) }
 
-if (!existsSync(join(work, 'node_modules/@deepseek-ai/dsh/lib/bin.js'))) fail(`work/${version}/ 里没有官方 dsh，先跑: node scripts/fetch-dsh.mjs ${version}`)
+if (!existsSync(join(workSource, 'node_modules/@deepseek-ai/dsh/lib/bin.js'))) fail(`work/${version}/ 里没有官方 dsh，先跑: node scripts/fetch-dsh.mjs ${version}`)
+console.log(`== 0/6 复制官方树 → work/${version}-build/（保持官方原样可反复 build）==`)
+rmSync(work, { recursive: true, force: true })
+cpSync(workSource, work, { recursive: true })
 
 // 1. 校验官方原样
 console.log(`== 1/6 校验 ${manifest.replace.length} 个待替换文件的官方原文件 ==`)
@@ -68,6 +74,14 @@ if (ib) {
   console.log(`  · 拷入 ${readdirSync(src).length} 个顶层项`)
 } else console.log('== 3/6 无图片后端 ==')
 
+// 3.5 OHOS 原生包（公共 registry 上没有，随版本目录入库）
+const na = manifest.nativeAssets
+if (na) {
+  console.log(`== 3.5/6 拷 OHOS 原生包 → ${na.target} ==`)
+  cpSync(join(ROOT, version, na.source), join(work, na.target), { recursive: true })
+  console.log(`  · ${readdirSync(join(ROOT, version, na.source, '@deepseek-ai')).length + readdirSync(join(ROOT, version, na.source, '@vscode')).length} 个平台包`)
+}
+
 // 4. 插件
 console.log('== 4/6 放插件 ==')
 const plugDir = join(ROOT, version, 'plugins')
@@ -85,6 +99,14 @@ for (const p of plugins) {
   mkdirSync(dirname(dst), { recursive: true })
   cpSync(src, dst, { recursive: true })
   console.log(`  · ${p.mode ?? 'add'} ${p.name} → ${target}`)
+}
+
+// 4.5 顶层 bin/ 资产（壳要用的 bash shim，官方包不含）
+const ba = manifest.binAssets
+if (ba) {
+  console.log(`== 4.5/6 放顶层 ${ba.target}/ ==`)
+  cpSync(join(ROOT, version, ba.source), join(work, ba.target), { recursive: true })
+  console.log(`  · ${readdirSync(join(ROOT, version, ba.source)).filter(n => !n.endsWith('.md')).join(', ')}`)
 }
 
 // 5. bin 别名（壳读 node_modules/bin，pnpm 生成 .bin）

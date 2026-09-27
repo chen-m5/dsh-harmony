@@ -8,35 +8,31 @@
       "--ignore-scripts",
       "--node-linker=hoisted"
     ],
-    "extraPackages": [
-      "@deepseek-ai/node-addon-system-openharmony-arm64@0.1.2",
-      "@vscode/ripgrep-openharmony-arm64@1.18.0"
-    ],
     "note": "沙箱里装不了原生模块（node-pty/koffi 的 node-gyp 失败），所以必须 --ignore-scripts；布局用 hoisted 以对齐壳的解包方式"
   },
   "replace": [
     {
       "path": "node_modules/@deepseek-ai/dsh-api-session-controller/lib/index.js",
       "sha256": "c97c617be67ce4b7f564e2e2a4a6a587e27c0a96cd144662932f2108f4e7140d",
-      "upstreamSha256": null,
+      "upstreamSha256": "fb0f7b96130f595db20809eeb77a195b05f4a039f931d1e67692f1f74a4dd269",
       "bytes": 124691
     },
     {
       "path": "node_modules/@deepseek-ai/dsh-client-ui-conversation/lib/client.js",
       "sha256": "7f1b54e76060c01cf91f0d4c893657ad60fa88f0c5c5a4aefe42747d9b734159",
-      "upstreamSha256": null,
+      "upstreamSha256": "40ef6d13ac73e06289cfc42ea941bd96739884f1727e0facdedc2e896495e960",
       "bytes": 714907
     },
     {
       "path": "node_modules/@deepseek-ai/dsh-client-ui-settings-account/lib/client.js",
       "sha256": "a83b6ac0d25934726d0050e9fd6c6515effe3c5732e2a713b47779368c743332",
-      "upstreamSha256": null,
+      "upstreamSha256": "e9b6ce9412d18b4e6ec1af0a79b523c884a566fb7c48425349398f80d3d90791",
       "bytes": 5279193
     },
     {
       "path": "node_modules/@deepseek-ai/dsh-attachment-local/lib/index.js",
       "sha256": "df26e1fb7cbaf8f6bfde2a0207a75fc401f53a9a4cff205ffd4b5f8e5a2f69f8",
-      "upstreamSha256": null,
+      "upstreamSha256": "cd39685581b4573a453c6126f8ce73da0bf1257c378827ebb431d6d4064f7662",
       "bytes": 63549
     }
   ],
@@ -50,5 +46,15 @@
     "from": "node_modules/.bin",
     "to": "node_modules/bin"
   },
-  "plugins": []
+  "plugins": [],
+  "nativeAssets": {
+    "source": "native/node_modules",
+    "target": "node_modules",
+    "note": "openharmony-arm64 平台专用包，公共 registry 上没有，作为资产入库（见 native/README.md）"
+  },
+  "binAssets": {
+    "source": "bin",
+    "target": "bin",
+    "note": "壳要用的顶层 bin/（bash shim），官方包不含；见 bin/README.md"
+  }
 }

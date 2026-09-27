@@ -17,7 +17,7 @@ const version = process.argv[3] ?? '0.1.7-rc.2'
 if (!existsSync(zip)) { console.error(`找不到 ${zip}`); process.exit(1) }
 const manifest = JSON.parse(readFileSync(join(ROOT, version, 'manifest.json'), 'utf8'))
 
-const list = execFileSync('unzip', ['-Z1', zip], { encoding: 'utf8' }).split('\n').filter(Boolean)
+const list = execFileSync('unzip', ['-Z1', zip], { encoding: 'utf8', maxBuffer: 64 << 20 }).split('\n').filter(Boolean)
 const files = list.filter(n => !n.endsWith('/'))
 const tops = new Set(files.map(n => n.split('/')[0]))
 const problems = []

@@ -14,7 +14,7 @@
  */
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -41,20 +41,23 @@ const sha256 = p => { const h = createHash('sha256'); h.update(readFileSync(p));
 console.log(`== 拉取官方 dsh@${manifest.dsh.version} → work/${version}/ ==`)
 rmSync(work, { recursive: true, force: true })
 mkdirSync(work, { recursive: true })
-writeFileSync(join(work, 'package.json'), JSON.stringify({ name: `dsh-fetch-${version}`, private: true, version: '0.0.0' }, null, 2) + '\n')
+// 版本目录里存了 pnpm-lock.yaml 就精确复现（首次跑会生成并保存）
+const lockSrc = join(verDir, 'pnpm-lock.yaml')
+const lockWork = join(work, 'pnpm-lock.yaml')
+if (existsSync(lockSrc)) { copyFileSync(lockSrc, lockWork); console.log('  · 用版本目录里的 pnpm-lock.yaml 精确复现依赖') }
+writeFileSync(join(work, 'package.json'), JSON.stringify({
+  name: `dsh-fetch-${version}`, private: true, version: '0.0.0',
+  dependencies: { [manifest.dsh.package]: manifest.dsh.version },
+}, null, 2) + '\n')
 
 const baseArgs = ['--ignore-scripts', '--node-linker=hoisted', ...(manifest.install.pnpmArgs ?? []).filter(a => !['--ignore-scripts', '--node-linker=hoisted'].includes(a))]
-pnpm(['add', ...baseArgs, `${manifest.dsh.package}@${manifest.dsh.version}`])
-
-const extra = manifest.install.extraPackages ?? []
-if (extra.length > 0) {
-  console.log(`== 装 OHOS 专用包（${extra.length} 个）==`)
-  // 这些包的 package.json 里通常写了 os:["openharmony"]，默认会被跳过 —— 用 supportedArchitectures 放行
-  pnpm(['add', ...baseArgs,
-    '--config.supportedArchitectures.os=openharmony,linux,darwin,win32',
-    '--config.supportedArchitectures.cpu=arm64,x64',
-    '--config.supportedArchitectures.libc=musl,glibc', ...extra])
+pnpm(existsSync(lockWork) ? ['install', ...baseArgs, '--frozen-lockfile'] : ['install', ...baseArgs])
+if (!existsSync(lockSrc) && existsSync(lockWork)) {
+  copyFileSync(lockWork, lockSrc)
+  console.log('  · 已把 pnpm-lock.yaml 存进版本目录（以后每次都能精确复现）')
 }
+
+// OHOS 平台专用包不在公共 registry 上（见 native/README.md），由 build-dsh.mjs 从 native/ 资产拷入
 
 console.log('== 记录官方原文件 sha256 到 manifest ==')
 let filled = 0
