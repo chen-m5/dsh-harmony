@@ -35,6 +35,18 @@ const work = join(ROOT, 'work', `${version}-build`)
 const sha256 = p => { const h = createHash('sha256'); h.update(readFileSync(p)); return h.digest('hex') }
 const fail = msg => { console.error(`  ✗ ${msg}`); process.exit(1) }
 
+// --refresh-sha：改过 files/ 之后刷新 manifest 里 files 的 sha256（上游基线 upstreamSha256 不动）
+if (args.includes('--refresh-sha')) {
+  let n = 0
+  for (const item of manifest.replace) {
+    const src = join(ROOT, version, 'files', item.path)
+    if (!existsSync(src)) continue
+    const h = sha256(src)
+    if (h !== item.sha256) { item.sha256 = h; console.log(`  · 刷新 ${item.path.replace('node_modules/@deepseek-ai/', '')} → ${h.slice(0, 12)}`); n++ }
+  }
+  if (n > 0) { writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n'); console.log(`  ✓ 已刷新 ${n} 个 files sha256`) }
+}
+
 if (!existsSync(join(workSource, 'node_modules/@deepseek-ai/dsh/lib/bin.js'))) fail(`work/${version}/ 里没有官方 dsh，先跑: node scripts/fetch-dsh.mjs ${version}`)
 console.log(`== 0/6 复制官方树 → work/${version}-build/（保持官方原样可反复 build）==`)
 rmSync(work, { recursive: true, force: true })
