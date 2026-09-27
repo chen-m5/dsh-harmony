@@ -9,3 +9,8 @@ exec /bin/sh "$@"
 ```
 
 由 `build-dsh.mjs` 拷进包顶层（`dsh-<版本>/bin/`）。
+
+## 说明
+
+本目录里只有 `bash` 会被打进包（本 README 不进包）。`manifest.json` 的 `binAssets`
+记着它的 `files` 与 `sha256`，`build-dsh.mjs` 打包前校验。

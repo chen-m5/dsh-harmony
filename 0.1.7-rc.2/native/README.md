@@ -10,3 +10,8 @@
 
 所以它们作为**资产随版本目录入库**，由 `build-dsh.mjs` 拷到 `node_modules/` 下
 （和 `image-backend/` 同一机制）。升级 dsh 版本时要确认这两个包的版本是否也要跟着换。
+
+## 校验
+
+`manifest.json` 的 `nativeAssets` 记着这棵树的 `files` 与 `sha256`，`build-dsh.mjs` 打包前校验。
+内容为官方平台包的**原样**拷贝（未改动代码）。

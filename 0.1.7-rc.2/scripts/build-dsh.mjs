@@ -35,6 +35,33 @@ const workSource = join(ROOT, 'work', version)
 const work = join(ROOT, 'work', `.build-${version}`)
 const sha256 = p => { const h = createHash('sha256'); h.update(readFileSync(p)); return h.digest('hex') }
 const fail = msg => { console.error(`  ✗ ${msg}`); process.exit(1) }
+/** 整棵资产树的确定性指纹：相对路径 + 文件 sha256 排序后拼接再哈希 */
+const treeSha = (dir) => {
+  const rows = []
+  const walk = (d, rel) => {
+    for (const name of readdirSync(d).sort()) {
+      const p = join(d, name)
+      const r = rel === '' ? name : `${rel}/${name}`
+      if (statSync(p).isDirectory()) walk(p, r)
+      else rows.push(`${r}\u0000${sha256(p)}`)
+    }
+  }
+  walk(dir, '')
+  const h = createHash('sha256')
+  h.update(rows.join('\n'))
+  return { files: rows.length, sha256: h.digest('hex') }
+}
+/** 校验一份资产与 manifest 记录一致（防止资产被悄悄改掉） */
+const checkAsset = (label, spec, srcDir) => {
+  if (!spec) return
+  if (!existsSync(srcDir)) fail(`缺资产 ${label}（${srcDir}）`)
+  if (spec.sha256 == null || spec.files == null) fail(`${label} 没记 sha256/files，先跑 --refresh-sha`)
+  const now = treeSha(srcDir)
+  if (now.files !== spec.files || now.sha256 !== spec.sha256) {
+    fail(`${label} 与 manifest 记录不一致（文件 ${now.files} vs ${spec.files}，哈希 ${now.sha256.slice(0, 12)} vs ${spec.sha256.slice(0, 12)}）`)
+  }
+  console.log(`  · ${label} 校验通过（${now.files} 文件）`)
+}
 
 // --refresh-sha：改过 files/ 之后刷新 manifest 里 files 的 sha256（上游基线 upstreamSha256 不动）
 if (args.includes('--refresh-sha')) {
@@ -45,7 +72,16 @@ if (args.includes('--refresh-sha')) {
     const h = sha256(src)
     if (h !== item.sha256) { item.sha256 = h; console.log(`  · 刷新 ${item.path.replace('node_modules/@deepseek-ai/', '')} → ${h.slice(0, 12)}`); n++ }
   }
-  if (n > 0) { writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n'); console.log(`  ✓ 已刷新 ${n} 个 files sha256`) }
+  for (const [key, src] of [['imageBackend', 'image-backend/node_modules'], ['nativeAssets', 'native/node_modules'], ['binAssets', 'bin']]) {
+    const spec = manifest[key]
+    if (!spec) continue
+    const tree = treeSha(join(ROOT, version, src))
+    if (tree.sha256 !== spec.sha256 || tree.files !== spec.files) {
+      spec.files = tree.files; spec.sha256 = tree.sha256; n++
+      console.log(`  · 刷新资产 ${src} → ${tree.files} 文件 / ${tree.sha256.slice(0, 12)}`)
+    }
+  }
+  if (n > 0) { writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n'); console.log(`  ✓ 已刷新 ${n} 项 sha256`) }
 }
 
 if (!existsSync(join(workSource, 'node_modules/@deepseek-ai/dsh/lib/bin.js'))) fail(`work/${version}/ 里没有官方 dsh，先跑: node scripts/fetch-dsh.mjs ${version}`)
@@ -77,6 +113,7 @@ for (const item of manifest.replace) {
 
 // 3. 图片后端
 const ib = manifest.imageBackend
+checkAsset('图片后端（jimp）', ib, join(ROOT, version, manifest.imageBackend?.source ?? 'image-backend/node_modules'))
 if (ib) {
   console.log(`== 3/6 装图片后端（jimp）→ ${ib.target.replace('node_modules/@deepseek-ai/', '')} ==`)
   const src = join(ROOT, version, ib.source)
@@ -90,6 +127,7 @@ if (ib) {
 
 // 3.5 OHOS 原生包（公共 registry 上没有，随版本目录入库）
 const na = manifest.nativeAssets
+checkAsset('OHOS 原生包', na, join(ROOT, version, manifest.nativeAssets?.source ?? 'native/node_modules'))
 if (na) {
   console.log(`== 3.5/6 拷 OHOS 原生包 → ${na.target} ==`)
   cpSync(join(ROOT, version, na.source), join(work, na.target), { recursive: true })
@@ -117,10 +155,14 @@ for (const p of plugins) {
 
 // 4.5 顶层 bin/ 资产（壳要用的 bash shim，官方包不含）
 const ba = manifest.binAssets
+checkAsset('顶层 bin/', ba, join(ROOT, version, manifest.binAssets?.source ?? 'bin'))
 if (ba) {
   console.log(`== 4.5/6 放顶层 ${ba.target}/ ==`)
-  cpSync(join(ROOT, version, ba.source), join(work, ba.target), { recursive: true })
-  console.log(`  · ${readdirSync(join(ROOT, version, ba.source)).filter(n => !n.endsWith('.md')).join(', ')}`)
+  // 只拷可执行入口，说明文件（*.md）不进包
+  mkdirSync(join(work, ba.target), { recursive: true })
+  const entries = readdirSync(join(ROOT, version, ba.source)).filter(n => !n.endsWith('.md'))
+  for (const e of entries) cpSync(join(ROOT, version, ba.source, e), join(work, ba.target, e))
+  console.log(`  · ${entries.join(', ')}`)
 }
 
 // 5. bin 别名（壳读 node_modules/bin，pnpm 生成 .bin）

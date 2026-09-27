@@ -39,7 +39,8 @@
   "imageBackend": {
     "source": "image-backend/node_modules",
     "target": "node_modules/@deepseek-ai/dsh-attachment-local/node_modules",
-    "files": 270
+    "files": 270,
+    "sha256": "7062b2e1a1150f5f4e90af17d00852c0c21ca158d79fa9828b03d2e9c6e1a649"
   },
   "binAlias": {
     "note": "pnpm hoisted 生成的是 node_modules/.bin/，壳里用的是 node_modules/bin/（无点）—— 打包时改名/复制",
@@ -50,11 +51,15 @@
   "nativeAssets": {
     "source": "native/node_modules",
     "target": "node_modules",
-    "note": "openharmony-arm64 平台专用包，公共 registry 上没有，作为资产入库（见 native/README.md）"
+    "note": "openharmony-arm64 平台专用包，公共 registry 上没有，作为资产入库（见 native/README.md）",
+    "files": 5,
+    "sha256": "54dbe1507e7460e0d69c1e0877d4e378e7a50989b276e8273d7170bd636df473"
   },
   "binAssets": {
     "source": "bin",
     "target": "bin",
-    "note": "壳要用的顶层 bin/（bash shim），官方包不含；见 bin/README.md"
+    "note": "壳要用的顶层 bin/（bash shim），官方包不含；见 bin/README.md",
+    "files": 2,
+    "sha256": "29169c81bf45e0259ce330aff7e0bc05fcf9e0a2daf420d3a6cac158c4a4aede"
   }
 }
