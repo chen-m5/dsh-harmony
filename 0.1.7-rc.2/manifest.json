@@ -34,6 +34,48 @@
       "sha256": "df26e1fb7cbaf8f6bfde2a0207a75fc401f53a9a4cff205ffd4b5f8e5a2f69f8",
       "upstreamSha256": "cd39685581b4573a453c6126f8ce73da0bf1257c378827ebb431d6d4064f7662",
       "bytes": 63549
+    },
+    {
+      "path": "node_modules/@deepseek-ai/dsh-client-connection/lib/client.js",
+      "sha256": "1b156fda9ef7f9a1e23ea1193a02e2b6c445a3fdfc731e346e50afe78ed725ca",
+      "upstreamSha256": "0fbb93fa2382bb66919767f69c909585c6255486f9536f9232231edaeac8c4e6",
+      "reason": "上游同名同版本重发后内容变了，用现役可跑的那份（node-addon-require-builtin 新版会让 dsh 起不来）"
+    },
+    {
+      "path": "node_modules/@deepseek-ai/dsh-client-ui-directory-picker-browse/lib/client.js",
+      "sha256": "5e77f1eb13b06a1620c33db00fe6dc5f9e9e09e1a219b8f9a341f3b7d0979370",
+      "upstreamSha256": "55af354b2c4ace0c2e676264cd56c24b7d5b9da005e40269a1c0a1f1bb76fdea",
+      "reason": "上游同名同版本重发后内容变了，用现役可跑的那份（node-addon-require-builtin 新版会让 dsh 起不来）"
+    },
+    {
+      "path": "node_modules/@deepseek-ai/dsh-client-ui-sidebar-documentpreview/lib/client.js",
+      "sha256": "48da56631ce5653331507a09cfd350f74189864ac752da0ebcf802573c6fc54f",
+      "upstreamSha256": "d8d2b78c89febaef7f1188c7435d01e70693d73494b8f288f09c5c6dedbd7cc5",
+      "reason": "上游同名同版本重发后内容变了，用现役可跑的那份（node-addon-require-builtin 新版会让 dsh 起不来）"
+    },
+    {
+      "path": "node_modules/@deepseek-ai/dsh-fs-local/lib/index.js",
+      "sha256": "2b4e292741ca1c33ec17a35563f2e66bb188a793cb62e60fcb58439fa2a804ba",
+      "upstreamSha256": "63fbb41d2c33e07111884b798be507e68c2752acab8249c821c20ade436e894f",
+      "reason": "上游同名同版本重发后内容变了，用现役可跑的那份（node-addon-require-builtin 新版会让 dsh 起不来）"
+    },
+    {
+      "path": "node_modules/@deepseek-ai/dsh-host-directory-picker-browse/lib/index.js",
+      "sha256": "6324eaaf2f9cc74cd6bae7809b1b9f1002e81cb07b76ec559fa456dc2ae506b3",
+      "upstreamSha256": "20d82ef343a4ee06f1ace8d56521b3e6c7cbbf52816acf056e9977839d31c54b",
+      "reason": "上游同名同版本重发后内容变了，用现役可跑的那份（node-addon-require-builtin 新版会让 dsh 起不来）"
+    },
+    {
+      "path": "node_modules/@deepseek-ai/node-addon-system/lib/flock.js",
+      "sha256": "0fb7e88635b91a512d37771ef7a4d72d8fcf47dd86c7d2dc5f4865ba14550ecc",
+      "upstreamSha256": "e42af00c298d56322c073bf7cc66485096028318ab645a2e69dc2aa7481ba646",
+      "reason": "上游同名同版本重发后内容变了，用现役可跑的那份（node-addon-require-builtin 新版会让 dsh 起不来）"
+    },
+    {
+      "path": "node_modules/node-addon-require-builtin/lib/index.js",
+      "sha256": "d9219d51f44eddbe4e98058144859d4a57c0fcc61741880aba9b79c0d52ba6b6",
+      "upstreamSha256": "73966bb0f824b021f77b03f02e00905a532554aad3c6c5a14c2a743aeb4a34a9",
+      "reason": "上游同名同版本重发后内容变了，用现役可跑的那份（node-addon-require-builtin 新版会让 dsh 起不来）"
     }
   ],
   "imageBackend": {

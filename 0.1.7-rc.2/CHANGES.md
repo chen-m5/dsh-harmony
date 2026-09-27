@@ -123,3 +123,27 @@ DeepSeek 账号登录**不需要**给 dsh 打任何补丁：
 - ↻ 按钮无底色、14px，与数字同一基线
 
 > 权威实现在 `files/`（整文件替换）；`patches/0005` 是第一版的历史留档，样式以 `files/` 为准。
+
+## 为什么有 7 个"非我们所改"的覆盖文件（compat）
+
+上游**用同一个版本号重新发布**过若干包，内容却变了。其中
+`node-addon-require-builtin@0.1.6` 的新版会 `require('node-addon-require-builtin-openharmony-arm64')`
+（该包在公共 registry 上不存在）→ **dsh 直接起不来**（实测：`Cannot find module …`）。
+
+所以这 7 个文件按**现役可跑的那份**覆盖（与我们的改造同一机制，都放在 `files/`）：
+
+```
+@deepseek-ai/dsh-client-connection/lib/client.js
+@deepseek-ai/dsh-client-ui-directory-picker-browse/lib/client.js
+@deepseek-ai/dsh-client-ui-sidebar-documentpreview/lib/client.js
+@deepseek-ai/dsh-fs-local/lib/index.js
+@deepseek-ai/dsh-host-directory-picker-browse/lib/index.js
+@deepseek-ai/node-addon-system/lib/flock.js
+node-addon-require-builtin/lib/index.js        ← 关键就是这个
+```
+
+manifest 里每项都带 `reason` 与 `upstreamSha256`。**升级 dsh 版本时要重新核对这 7 项**
+（上游修好之后就该去掉）。
+
+验证（2026-09 实测）：用本流程产出的包起实例 → `dsh web: http://127.0.0.1:32199/?token=…`，
+端口返回 HTTP 401（要 token = 服务正常）。
