@@ -49,7 +49,7 @@ if (args.includes('--refresh-sha')) {
 }
 
 if (!existsSync(join(workSource, 'node_modules/@deepseek-ai/dsh/lib/bin.js'))) fail(`work/${version}/ 里没有官方 dsh，先跑: node scripts/fetch-dsh.mjs ${version}`)
-console.log(`== 0/6 复制官方树 → work/${version}-build/（保持官方原样可反复 build）==`)
+console.log(`== 0/6 复制官方树 → work/.build-${version}/（保持官方原样可反复 build）==`)
 rmSync(work, { recursive: true, force: true })
 cpSync(workSource, work, { recursive: true })
 
@@ -147,4 +147,4 @@ rmSync(out, { force: true })
 execFileSync('zip', ['-r', '-q', out, `dsh-${version}`], { cwd: stage, stdio: 'inherit' })
 rmSync(stage, { recursive: true, force: true })
 console.log(`  · ${out}（${(statSync(out).size / 1048576).toFixed(1)} MiB）`)
-execFileSync(process.execPath, [join(ROOT, 'scripts/verify-dsh.mjs'), out, version], { stdio: 'inherit' })
+execFileSync(process.execPath, [join(ROOT, version, 'scripts/verify-dsh.mjs'), out, version], { stdio: 'inherit' })
