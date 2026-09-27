@@ -147,3 +147,18 @@ manifest 里每项都带 `reason` 与 `upstreamSha256`。**升级 dsh 版本时�
 
 验证（2026-09 实测）：用本流程产出的包起实例 → `dsh web: http://127.0.0.1:32199/?token=…`，
 端口返回 HTTP 401（要 token = 服务正常）。
+
+## 运行时验证（2026-09-28，真机实际运行）
+
+新包在鸿蒙壳里**重新启动并实测通过**：
+
+| 项 | 结果 |
+|---|---|
+| 启动 | pid 用的就是新包（`files/pkg/dsh-ohos-0.1.7-rc.2`）✓，服务 `:32100` 返回 401（要 token = 正常）✓ |
+| 与壳下 zip 关键文件 | 4/4 sha256 一致 ✓（`dsh/lib/bin.js`、`settings-account/client.js`、`node-addon-require-builtin/lib/index.js`、`attachment-local/lib/index.js`）|
+| 余额条新样式 | `label-tertiary` 6 处 ✓、旧灰底 0 处 ✓ |
+| 登录桥 | `dshShell.openLogin` 2 处 ✓ |
+| compat 覆盖 | `node-addon-require-builtin` 可加载 ✓（不覆盖就起不来）|
+| 图片后端 | jimp 模块按 dsh 真实 require 方式 **4/4 解析成功** ✓；真跑 `2x2 → resize 8x8 → rotate → flip → PNG/JPEG 编码` 全通 ✓ |
+
+一键自检脚本：壳仓库 `scripts/check-dsh-runtime.sh`（只读，不重启 dsh）。
