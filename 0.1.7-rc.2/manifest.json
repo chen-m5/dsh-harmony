@@ -25,9 +25,10 @@
     },
     {
       "path": "node_modules/@deepseek-ai/dsh-client-ui-settings-account/lib/client.js",
-      "sha256": "c9c769582442c10b4dafa3d49c580c813a7b499cda6b05eda10aea02dfdcb9ff",
+      "sha256": "870180603f17082d68699010915cf66714f91b5140a3e9ff21e69fe648e4bc75",
       "upstreamSha256": "e9b6ce9412d18b4e6ec1af0a79b523c884a566fb7c48425349398f80d3d90791",
-      "bytes": 5281400
+      "bytes": 5281400,
+      "note": " | 2026-09-28：余额改为登录后才拉（未登录不空跑）"
     },
     {
       "path": "node_modules/@deepseek-ai/dsh-attachment-local/lib/index.js",
