@@ -11,7 +11,7 @@
  *   3. 图片后端：image-backend/node_modules → node_modules/@deepseek-ai/dsh-attachment-local/node_modules
  *   4. 插件：plugins/ 下每个目录按 plugins.json（缺省按目录名推断）add / replace
  *   5. bin 别名：node_modules/.bin → node_modules/bin（壳读的是无点的那个）
- *   6. 打包：临时目录布局成 dsh-<版本>/{bin,node_modules} → zip（顶层目录名必须是 dsh-<版本>）
+ *   6. 打包：临时目录布局成 dsh-ohos-<版本>/{bin,node_modules} → zip（顶层目录名必须是 dsh-ohos-<版本>，与壳的 PkgVersion 同一规则）
  *   7. 自检：调 verify-dsh.mjs
  */
 import { execFileSync } from 'node:child_process'
@@ -23,6 +23,10 @@ import { fileURLToPath } from 'node:url'
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const args = process.argv.slice(2)
 const version = args.find(a => !a.startsWith('--'))
+
+// ── 统一命名（**唯一规则**）：zip 名 / zip 内顶层目录 / 沙箱版本目录 一律 dsh-ohos-<版本> ──
+// 壳侧 PkgVersion.ets 用的是同一条规则；换版本只改 version。
+const PKG_DIR_NAME = `dsh-ohos-${version}`;
 if (!version) { console.error('用法: node scripts/build-dsh.mjs <版本> [--out <zip>]'); process.exit(1) }
 
 // --clean：清掉打包中间产物（work/<版本>/ 官方树 与 work/.build-<版本>/ 构建副本）
@@ -204,14 +208,14 @@ if (existsSync(dotBin)) {
 console.log(`== 6/6 打包 → ${out} ==`)
 const stage = join(ROOT, 'work', `stage-${version}`)
 rmSync(stage, { recursive: true, force: true })
-mkdirSync(join(stage, `dsh-${version}`), { recursive: true })
+mkdirSync(join(stage, PKG_DIR_NAME), { recursive: true })
 // 与壳解包后的布局保持一致：dsh-<版本>/{bin,node_modules}
 for (const entry of ['bin', 'node_modules']) {
   const p = join(work, entry)
-  if (existsSync(p)) cpSync(p, join(stage, `dsh-${version}`, entry), { recursive: true })
+  if (existsSync(p)) cpSync(p, join(stage, PKG_DIR_NAME, entry), { recursive: true })
 }
 rmSync(out, { force: true })
-execFileSync('zip', ['-r', '-q', out, `dsh-${version}`], { cwd: stage, stdio: 'inherit' })
+execFileSync('zip', ['-r', '-q', out, PKG_DIR_NAME], { cwd: stage, stdio: 'inherit' })
 rmSync(stage, { recursive: true, force: true })
 console.log(`  · ${out}（${(statSync(out).size / 1048576).toFixed(1)} MiB）`)
 execFileSync(process.execPath, [join(ROOT, version, 'scripts/verify-dsh.mjs'), out, version], { stdio: 'inherit' })
