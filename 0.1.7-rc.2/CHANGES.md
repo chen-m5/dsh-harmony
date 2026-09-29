@@ -45,7 +45,7 @@
 
 → **改造面就是这 11 个文件 + 3 类资产**，没有别的。`manifest.json` 里的 `replace` 列表与实测完全一致（不多不少）。
 
-### 2.2 替换的 11 个文件（= `files/`，保留包内相对路径）
+### 2.2 替换的 13 个文件（= `files/`，保留包内相对路径）
 
 `manifest.json` 的 `replace[]` 逐项记着**官方原文件 sha256** 与**我们这份 sha256**；`build-dsh.mjs`
 每次打包前校验「官方树确实是官方原样」，不符就**报错停下**（防止上游变了却静默覆盖）。
@@ -86,6 +86,12 @@
 - 也就是说：**用当前官方内容直接覆盖会丢掉我们的改动；照抄这份覆盖会带回旧版上游内容** —— 两头都要看。
 
 ### 2.4 随包资产（官方树里没有，必须随版本目录自带）
+
+> **2026-09-29 新增 `pty-backend/`**：`node-pty` 自带 prebuilds 只有 darwin/linux/win32，
+> **没有 openharmony** → 侧栏终端与常驻 shell 都起不来（`Failed to load native module: pty.node`）。
+> 官方也没发鸿蒙版（`@deepseek-ai/node-pty-openharmony-arm64` 之类在 registry 上 404），所以
+> **自己交叉编译并自签名**，作为资产入库（`manifest.ptyAssets` → 解到 `node_modules/node-pty/prebuilds`）。
+> 编译要点见 `scripts/build-pty.mjs` 与第六节。
 
 | 资产 | 内容 | 体积 | 去处 |
 |---|---|---|---|
@@ -228,3 +234,21 @@ dsh 侧唯一的改动是上表第 7 项**①**：把**授权页 URL**交给宿�
 - **文档预览（第 11 项）**：见第四节。
 - **从「补丁重放」改为「整文件替换」**（2026-09）：仓库里只留 `files/` 整文件 + 每版独立脚本，
   不再对构建产物打 patch —— 上游挪几行也不会冲突，且「我们改了什么」一眼可见。
+
+- **进程检查器的平台白名单（2026-09-29）**：`dsh-subprocess-local` 的 `createProcessInspector()`
+  只认 `linux/darwin/win32`，鸿蒙上 `process.platform === 'openharmony'` → 直接抛
+  `terminal inspection is unsupported on platform openharmony`（dsh 侧栏终端一打开就报错）。
+  改为**把 openharmony 与 linux 同等对待**（鸿蒙内核是 Linux 系、`/proc` 可读，该 inspector 正是读 `/proc`）。
+  核查：全包 64 处 `process.platform` 判断，其余 63 处都是 `=== 'win32'`（openharmony 自然走 posix 分支），
+  只有这一处是**枚举白名单 + throw** —— 换 dsh 版本时要复查同类写法。
+- **自编译 node-pty 原生模块（2026-09-29）**：见 2.4。关键是三层：
+  ① 交叉编译（用 VM 的 clang-17 + OHOS SDK 的 sysroot/libcxx；SDK 自带的编译器是 x64，沙箱/VM 都是 aarch64 跑不了）；
+  ② `.codesign` 段（鸿蒙 dlopen 前校验代码签名；**占位段无效**，要用 `ohos-bst-light` 真自签名，
+     且 SDK 的 clang/lld 自动插的那个也是无效的）；
+  ③ 入库方式用**资产**而非 `replace`（`replace` 要求上游文件存在，而这是新增文件）。
+  脚本：`scripts/build-pty.mjs`（前提探测 → 自动下 node 头文件 → 编译 → 自签名 → 落 `pty-backend/`）。
+- **侧栏终端的复制/粘贴（2026-09-29）**：HTML 终端（xterm.js）里没有自定义快捷键，Ctrl+C 是 SIGINT、
+  Ctrl+V 受 Web 剪贴板限制。给 `dsh-client-ui-sidebar-terminal/lib/client.terminal.js` 打了补丁：
+  **选中后单击右键=复制、双击右键=粘贴、Ctrl+V=粘贴**（走 Web 剪贴板 API，不占系统权限），
+  并在面板底部显示一行操作提示。（初版用 Ctrl+Shift+C，与浏览器 DevTools 冲突，已弃用。）
+  注：客户端插件是运行时从 `/plugin/...` 加载的，WebView 会缓存 —— 改动要重装 hap 才生效。
