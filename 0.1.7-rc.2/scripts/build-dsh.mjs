@@ -92,7 +92,7 @@ if (args.includes('--refresh-sha')) {
     const h = sha256(src)
     if (h !== item.sha256) { item.sha256 = h; console.log(`  · 刷新 ${item.path.replace('node_modules/@deepseek-ai/', '')} → ${h.slice(0, 12)}`); n++ }
   }
-  for (const [key, src] of [['imageBackend', 'image-backend/node_modules'], ['nativeAssets', 'native/node_modules'], ['binAssets', 'bin']]) {
+  for (const [key, src] of [['imageBackend', 'image-backend/node_modules'], ['nativeAssets', 'native/node_modules'], ['binAssets', 'bin'], ['ptyAssets', 'pty-backend/prebuilds']]) {
     const spec = manifest[key]
     if (!spec) continue
     const tree = treeSha(join(ROOT, version, src))
@@ -161,6 +161,16 @@ if (na) {
   console.log(`== 3.5/6 拷 OHOS 原生包 → ${na.target} ==`)
   cpSync(join(ROOT, version, na.source), join(work, na.target), { recursive: true })
   console.log(`  · ${readdirSync(join(ROOT, version, na.source, '@deepseek-ai')).length + readdirSync(join(ROOT, version, na.source, '@vscode')).length} 个平台包`)
+}
+
+// 3.6 pty 原生模块（自己为鸿蒙编的；node-pty 自带 prebuilds 只有 darwin/linux/win32）
+// 注意用 cpSync **合并**（不能 rm 目标目录 —— 那里还有其它平台的 prebuilds）
+const pa = manifest.ptyAssets
+checkAsset('pty 原生模块', pa, join(ROOT, version, manifest.ptyAssets?.source ?? 'pty-backend/prebuilds'))
+if (pa) {
+  console.log(`== 3.6/6 装 pty 原生模块 → ${pa.target} ==`)
+  cpSync(join(ROOT, version, pa.source), join(work, pa.target), { recursive: true })
+  console.log(`  · ${pa.files} 个文件（${Object.keys(pa).includes('note') ? '鸿蒙交叉编译' : ''}）`)
 }
 
 // 4. 插件
