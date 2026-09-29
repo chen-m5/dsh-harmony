@@ -77,6 +77,12 @@
       "sha256": "d9219d51f44eddbe4e98058144859d4a57c0fcc61741880aba9b79c0d52ba6b6",
       "upstreamSha256": "73966bb0f824b021f77b03f02e00905a532554aad3c6c5a14c2a743aeb4a34a9",
       "reason": "上游同名同版本重发后内容变了，用现役可跑的那份（node-addon-require-builtin 新版会让 dsh 起不来）"
+    },
+    {
+      "path": "node_modules/@deepseek-ai/dsh-subprocess-local/lib/runner-launch-B2zsQ1Dz.js",
+      "sha256": "791538e0f1b56ef1069806cdb1b0edc69451c8751b6d3427de0d28ef8a3c152e",
+      "upstreamSha256": "6df08adc4a27f278878a5f4cde8b551b51e647b922ac7d6591fd62d272ced153",
+      "reason": "HarmonyOS 的内核是 Linux 系：process.platform 在 OpenHarmony 上是 \"openharmony\"，而 createProcessInspector 只认 linux/darwin/win32 → 原来直接抛 \"terminal inspection is unsupported on platform openharmony\"，dsh 侧栏终端因此报错。改成把 openharmony 与 linux 同等对待（读 /proc 的 LinuxProcessInspector 在鸿蒙可用）。"
     }
   ],
   "imageBackend": {
