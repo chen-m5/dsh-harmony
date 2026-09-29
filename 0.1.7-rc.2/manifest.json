@@ -86,8 +86,8 @@
     },
     {
       "path": "node_modules/@deepseek-ai/dsh-client-ui-sidebar-terminal/lib/client.terminal.js",
-      "sha256": "afca34affb7f9e9548bf97f5e0298df7376b8a8d3f93e6479728564621bc6485",
-      "reason": "侧栏终端加复制/粘贴快捷键与提示：Ctrl+Shift+C 复制（Ctrl+C 保留为 SIGINT 中断）、Ctrl+V/Ctrl+Shift+V 粘贴（走 Web 剪贴板 API，不占系统权限），并在面板底部显示一行快捷键提示。",
+      "sha256": "d0f294c0815c41a3c3701438bc4e7606e01cb931b54ee590d42f90b6a0192b2f",
+      "reason": "侧栏终端的复制/粘贴改用鼠标与 Ctrl+V：**选中后单击右键=复制**、**双击右键=粘贴**、Ctrl+V=粘贴（走 Web 剪贴板 API，不占系统权限）；Ctrl+C 保持 SIGINT 不拦。面板底部显示操作提示。（先试过 Ctrl+Shift+C，与浏览器 DevTools 冲突，已弃用。）",
       "upstreamSha256": "5cfb1b93c7d3f2710e99610ef596d30064a603e78450da1ad61b9bb53f750fa5"
     }
   ],
