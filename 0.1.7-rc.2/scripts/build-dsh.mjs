@@ -224,6 +224,9 @@ for (const entry of ['bin', 'node_modules']) {
   const p = join(work, entry)
   if (existsSync(p)) cpSync(p, join(stage, PKG_DIR_NAME, entry), { recursive: true })
 }
+// 包目录里的版本号文件：壳的「外挂包」读它把版本号显示出来（内置包有编译期常量，但保持一致；
+// 约定见壳仓库 PkgVersion.ets 的 PKG_VERSION_FILE）
+writeFileSync(join(stage, PKG_DIR_NAME, 'VERSION'), `${version}\n`);
 rmSync(out, { force: true })
 execFileSync('zip', ['-r', '-q', out, PKG_DIR_NAME], { cwd: stage, stdio: 'inherit' })
 rmSync(stage, { recursive: true, force: true })
