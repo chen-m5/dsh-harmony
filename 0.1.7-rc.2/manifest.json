@@ -115,7 +115,7 @@
     "target": "bin",
     "note": "壳要用的顶层 bin/（bash shim），官方包不含；见 bin/README.md",
     "files": 2,
-    "sha256": "29169c81bf45e0259ce330aff7e0bc05fcf9e0a2daf420d3a6cac158c4a4aede"
+    "sha256": "e57a99d738b8cb86c53b146de0145e1cf3e4ba908eb1944d83add51a2d934797"
   },
   "ptyAssets": {
     "source": "pty-backend/prebuilds",
