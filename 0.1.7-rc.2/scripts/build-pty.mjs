@@ -110,16 +110,36 @@ const args = [
   '-shared', '-fPIC', '-O2', '-std=c++17',
   '-Wall',
   '--target=aarch64-linux-ohos',
+  '--sysroot=' + join(CACHE, '..', 'ohos-native', 'native', 'native', 'sysroot'),
+  '-resource-dir=' + (process.env.OHOS_RESOURCE_DIR || join(CACHE, '..', 'ohos-native', 'native', 'native', 'llvm', 'lib', 'clang', '15.0.4')),
+  '-I' + join(CACHE, '..', 'ohos-native', 'native', 'native', 'llvm', 'include', 'libcxx-ohos', 'include', 'c++', 'v1'),
   '-DNAPI_VERSION=10',
   '-I' + inc,
   '-I' + join(napiDir),
   '-o', outFile,
   join(pty, 'src', 'unix', 'pty.cc'),
-  '-lutil'
+  '-L' + join(CACHE, '..', 'ohos-native', 'native', 'native', 'llvm', 'lib', 'aarch64-linux-ohos'),
+  '-lutil', '-lc++'
 ];
 log('  ' + clang + ' ' + args.join(' '));
 execFileSync(clang, args, { stdio: 'inherit' });
 log(`  ✓ 产出 ${outFile}`);
+
+// ── 自签名（**关键一步，否则鸿蒙拒绝 dlopen**）─────────────────────────────
+// 鸿蒙要求 ELF 带有效的 `.codesign` 段。手工编出来的（用系统 clang）本来没有；
+// 而 OHOS SDK 的 clang/lld 虽会自动插一个，但那是**无效占位**（实测仍 Permission denied）。
+// 用 ohos-bst-light（逆向 binary-sign-tool 的实现，零依赖）做**真自签名**。
+const SIGNER = process.env.OHOS_SELF_SIGN
+  || ['/home/user/dsh-workspace/ohos-bst-light/selfsign.py'].find(existsSync);
+if (SIGNER) {
+  log('== 自签名（.codesign）==');
+  execFileSync('python3', [SIGNER, outFile, '--force'], { stdio: 'inherit' });
+  execFileSync('chmod', ['755', outFile]);          // 鸿蒙侧要可执行位
+  log('  ✓ 已签名并 chmod 755');
+} else {
+  log('! 没找到自签名工具（ohos-bst-light 的 selfsign.py）—— 产物在鸿蒙上会 Permission denied。');
+  log('  获取：git clone https://gitcode.com/autoend/ohos-bst-light（0BSD），或用 OHOS_SELF_SIGN 指定路径');
+}
 
 // 拷进现役包（方便立刻验证，不必重打包）
 const live = '/data/storage/el2/base/haps/entry/files/pkg/dsh-ohos-' + VERSION

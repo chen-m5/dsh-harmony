@@ -116,6 +116,6 @@
     "target": "node_modules/node-pty/prebuilds",
     "note": "为鸿蒙交叉编译的 node-pty 原生模块（自带 prebuilds 只有 darwin/linux/win32）。用 OHOS native SDK 编：clang++ --target=aarch64-linux-ohos --sysroot=<sdk>/sysroot -I<sdk>/llvm/include/libcxx-ohos/include/c++/v1 -resource-dir=<sdk>/llvm/lib/clang/15.0.4 -lutil -lc++。脚本见 scripts/build-pty.mjs",
     "files": 1,
-    "sha256": "4faf2bac90cbee0143623ac31871d53169a09bafa24a47d7e2e791f6d0a6663b"
+    "sha256": "d610482ec26baeed221539a309cc3e397d56f8063b92568dee527904919c0676"
   }
 }
