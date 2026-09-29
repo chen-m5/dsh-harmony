@@ -75,20 +75,24 @@ soft('chmod', ['755', join(dir, 'node_modules/@vscode/ripgrep-openharmony-arm64/
 soft('chmod', ['-R', 'a+x', join(dir, 'node_modules/.bin')])
 soft('chmod', ['755', join(dir, 'bin/bash')])
 
-// 4. 自检：壳 verifyExternal() 会查的几项
+// 4. 自检：前三项是壳 verifyExternal() 硬性要查的（缺了会被拒）
 console.log('== 自检（壳预检会查这些）==')
 let bad = 0
 const checks = [
   ['dsh 入口 bin.js', join(dir, 'node_modules/@deepseek-ai/dsh/lib/bin.js')],
   ['require-builtin JS 垫片', join(dir, 'node_modules/node-addon-require-builtin/lib/index.js')],
   ['rg shim（可直接 spawn）', join(dir, 'node_modules/@vscode/ripgrep-openharmony-arm64/bin/rg')],
-  ['版本号文件 VERSION', join(dir, 'VERSION')],
 ]
 for (const [label, p] of checks) {
   const ok = existsSync(p)
   console.log(`  ${ok ? '✓' : '✗'} ${label}`)
   if (!ok) bad++
 }
+// VERSION 是 0.2.0 起才有的约定，**可选**：老包（如 0.1.7-rc.2）没有它，
+// 壳只会把版本显示成「未知版本」，不影响外挂 —— 所以这项不参与失败判定
+const ver = join(dir, 'VERSION')
+const hasVer = existsSync(ver)
+console.log(`  ${hasVer ? '✓' : '·'} 版本号文件 VERSION${hasVer ? '' : '（这个版本的包没有，壳显示「未知版本」）'}`)
 if (bad > 0) {
   console.error('\n✗ 自检没过：这个目录拿去外挂会被壳拒绝')
   process.exit(1)
@@ -99,5 +103,5 @@ console.log(`
   · 上传用（带版本号的 zip）：${zip}
   · 外挂用（解压目录）：      ${dir}
 
-壳里「设置 → 提示 → 外挂」填上面那个**目录**（版本号可留空，壳会读目录里的 VERSION）；
+壳里「设置 → dsh 控制 → 外挂」填上面那个**目录**（版本号可留空，壳会读目录里的 VERSION）；
 试完没问题再换内置包（改 PkgVersion.ets 的 DSH_VERSION → sh scripts/build-hap.sh）。`)
