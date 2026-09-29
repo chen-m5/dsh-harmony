@@ -32,8 +32,8 @@ scripts/                    顶层：**共用件**
 
 ```sh
 node scripts/fetch-dsh.mjs 0.1.7-rc.2      # 拉官方包到 work/0.1.7-rc.2/
-node scripts/build-dsh.mjs 0.1.7-rc.2      # 出 dsh-ohos-0.1.7-rc.2.zip
-node scripts/verify-dsh.mjs dsh-ohos-0.1.7-rc.2.zip
+node scripts/build-dsh.mjs 0.1.7-rc.2      # 出 dsh-ohos.zip（顶层目录 dsh-ohos-0.1.7-rc.2/）
+node scripts/verify-dsh.mjs dsh-ohos.zip
 ```
 
 ## 许可与免责

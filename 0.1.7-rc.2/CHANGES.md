@@ -14,7 +14,7 @@
 | 项 | 值 |
 |---|---|
 | 上游 | `@deepseek-ai/dsh` **0.1.7-rc.2**（MIT） |
-| 改造形态 | **11 个文件整文件替换** + 3 类随包资产（不是 patch 重放） |
+| 改造形态 | **13 个文件整文件替换** + 4 类随包资产（不是 patch 重放） |
 | 本仓库不含 | dsh 源码、dsh 包体 —— 打包时用 pnpm 拉官方包，再按本清单替换/新增 |
 | 上次更新 | 2026-09-28（补全量比对实测） |
 
@@ -43,7 +43,8 @@
 | 大小不同 | 23 | = **替换的 11 个文件** + 12 个 `.bin/*`（就是上面的 `bin/`） |
 | 大小相同内容不同 | 1 | `node_modules/.modules.yaml`（pnpm 自己的元数据，无意义） |
 
-→ **改造面就是这 11 个文件 + 3 类资产**，没有别的。`manifest.json` 里的 `replace` 列表与实测完全一致（不多不少）。
+→ **改造面就是这些文件 + 4 类资产**，没有别的（初测时是 11 个文件，后来又追加了第 12、13 项，见上表）。
+`manifest.json` 里的 `replace` 列表与实测完全一致（不多不少）。
 
 ### 2.2 替换的 13 个文件（= `files/`，保留包内相对路径）
 
@@ -63,6 +64,11 @@
 | 9 | `@deepseek-ai/dsh-host-directory-picker-browse/lib/index.js` | 目录选择器**根限制**：起点/边界钳在指定根下，越界钳回；`DSH_PICKER_ROOT` 可改根（鸿蒙上 directory-picker 一定走 `browse` 后端，上游 browse 可浏览整个文件系统） | 产品定制 |
 | 10 | `@deepseek-ai/dsh-client-ui-directory-picker-browse/lib/client.js` | 摘除面包屑行尾的「编辑路径」铅笔按钮（路径只能逐级点选） | 产品定制 |
 | 11 | `@deepseek-ai/dsh-client-ui-sidebar-documentpreview/lib/client.js` | 预览不再被 `meta.status="none"` 拦（`canRead=true`）、加载态加刷新按钮 | 产品定制（见第四节限制） |
+| 12 | `@deepseek-ai/dsh-subprocess-local/lib/runner-launch-B2zsQ1Dz.js` | 终端 inspector 原来只认 linux/darwin/win32，鸿蒙上直接抛「terminal inspection is unsupported on platform openharmony」→ 改成**把 openharmony 与 linux 同等对待**（读 `/proc` 的 LinuxProcessInspector 在鸿蒙可用） | **能力**（不补侧栏终端报错） |
+| 13 | `@deepseek-ai/dsh-client-ui-sidebar-terminal/lib/client.terminal.js` | 侧栏终端的复制/粘贴改用鼠标与 Ctrl+V：**选中后单击右键=复制**、**双击右键=粘贴**、Ctrl+V=粘贴（走 Web 剪贴板 API，不占系统权限）；Ctrl+C 保持 SIGINT 不拦；面板底部显示操作提示 | 体验 |
+
+> 第 12、13 项是**后来追加**的（侧栏终端）；下面 2.1 里的全量实测数字（2026-09-28）是当时 11 个文件的口径，
+> 追加这两项后没有重跑全量比对 —— 但 manifest 与 `files/` 一直是同步的。
 
 > 这 11 个都是**我们的改动**（不是官方内容）：拿改动特征逐个在官方树里查过 ——
 > 例如 `flock.js` 的 `'openharmony'` 白名单官方 0 处、`DSH_PICKER_ROOT` 官方 0 处、
@@ -87,17 +93,12 @@
 
 ### 2.4 随包资产（官方树里没有，必须随版本目录自带）
 
-> **2026-09-29 新增 `pty-backend/`**：`node-pty` 自带 prebuilds 只有 darwin/linux/win32，
-> **没有 openharmony** → 侧栏终端与常驻 shell 都起不来（`Failed to load native module: pty.node`）。
-> 官方也没发鸿蒙版（`@deepseek-ai/node-pty-openharmony-arm64` 之类在 registry 上 404），所以
-> **自己交叉编译并自签名**，作为资产入库（`manifest.ptyAssets` → 解到 `node_modules/node-pty/prebuilds`）。
-> 编译要点见 `scripts/build-pty.mjs` 与第六节。
-
 | 资产 | 内容 | 体积 | 去处 |
 |---|---|---|---|
 | `image-backend/` | jimp 依赖闭包：**270 个文件 / 约 2 MB**（`@jimp/core`、`js-png`、`js-jpeg`、`plugin-resize/rotate/flip` + 依赖闭包）；**代码与官方 npm 包逐字节一致**，只是裁掉了 `*.d.ts`/`*.map` 之类 | 约 2 MB | `node_modules/@deepseek-ai/dsh-attachment-local/node_modules/`（放包内避免与 dsh 顶层依赖撞版本：`zod` 3 vs 4、`debug` 4 vs 2…） |
 | `native/` | OHOS 平台专用包 **5 个文件**：`@deepseek-ai/node-addon-system-openharmony-arm64@0.1.2`（flock 原生加载器）、`@vscode/ripgrep-openharmony-arm64@1.18.0`（ripgrep 二进制）—— **公共 registry 上 404**，只能随仓库走 | 约 110 KB | `node_modules/` |
 | `bin/` | 壳要用的顶层 `bin/bash`（28 字节 shim：`exec /bin/sh "$@"`）—— 官方 npm 包里**没有**顶层 `bin/` | 约 4 KB | 包顶层 `bin/` |
+| `pty-backend/` | 为鸿蒙交叉编译的 `node-pty` 原生模块（自带 prebuilds 只有 darwin/linux/win32），用 OHOS native SDK 编 | 约 100 KB | `node_modules/node-pty/prebuilds` |
 
 裁剪/重装 jimp 的配方：`patches/jimp-deps.json` + 顶层 `scripts/trim-jimp.mjs`。
 不做 `native/`、`image-backend/` 的后果：**前者起不来，后者图片功能全废**（且都是懒加载，症状很晚才暴露）。
@@ -118,11 +119,11 @@ pnpm（hoisted）生成的是 `node_modules/.bin/`，而壳里用的是 **`node_
 | 3、12 | 平台包 → `native/` |
 | **4、5、6、7** | **已不需要**（`dsh-app-boot`、`dsh-subprocess-local`、`dsh-session-persistence-jsonl`、`dsh-ptc-runtime-node`）：全量比对实测这 4 个文件**与官方内容一致**，当前版本无需改 |
 
-> 所以「18 处」是**历史计数**；当前实际是 **11 个文件替换 + 3 类资产**。
+> 所以「18 处」是**历史计数**；当前实际是 **13 个文件替换 + 4 类资产**。
 
 ## 三、产物与打包
 
-产物 = `dsh-ohos-<版本>.zip`（顶层目录 `dsh-<版本>/`，内含 `node_modules/`），由本仓库脚本产出：
+产物 = 一个 zip（顶层目录 `dsh-ohos-<版本>/`，内含 `node_modules/`），由本仓库脚本产出（文件名由 `--out` 决定，壳固定传 `dsh-ohos.zip`）：
 
 ```sh
 node scripts/fetch-dsh.mjs 0.1.7-rc.2                 # 拉官方包（--ignore-scripts --node-linker=hoisted，按 pnpm-lock.yaml）
@@ -213,7 +214,7 @@ dsh 侧唯一的改动是上表第 7 项**①**：把**授权页 URL**交给宿�
 
 | 项 | 结果 |
 |---|---|
-| 启动 | 跑的就是新包（`files/pkg/dsh-ohos-0.1.7-rc.2`）✓，服务 `:32100` 返回 401（要 token = 正常）✓ |
+| 启动 | 跑的就是新包（`files/dsh-pkg`）✓，服务 `:32100` 返回 401（要 token = 正常）✓ |
 | 与壳下 zip 关键文件 | 4/4 sha256 一致 ✓（`dsh/lib/bin.js`、`settings-account/client.js`、`node-addon-require-builtin/lib/index.js`、`attachment-local/lib/index.js`） |
 | 余额条新样式 | `label-tertiary` 命中 ✓、旧灰底 0 处 ✓ |
 | 登录桥 | `dshShell.openLogin` ✓ |
@@ -234,21 +235,3 @@ dsh 侧唯一的改动是上表第 7 项**①**：把**授权页 URL**交给宿�
 - **文档预览（第 11 项）**：见第四节。
 - **从「补丁重放」改为「整文件替换」**（2026-09）：仓库里只留 `files/` 整文件 + 每版独立脚本，
   不再对构建产物打 patch —— 上游挪几行也不会冲突，且「我们改了什么」一眼可见。
-
-- **进程检查器的平台白名单（2026-09-29）**：`dsh-subprocess-local` 的 `createProcessInspector()`
-  只认 `linux/darwin/win32`，鸿蒙上 `process.platform === 'openharmony'` → 直接抛
-  `terminal inspection is unsupported on platform openharmony`（dsh 侧栏终端一打开就报错）。
-  改为**把 openharmony 与 linux 同等对待**（鸿蒙内核是 Linux 系、`/proc` 可读，该 inspector 正是读 `/proc`）。
-  核查：全包 64 处 `process.platform` 判断，其余 63 处都是 `=== 'win32'`（openharmony 自然走 posix 分支），
-  只有这一处是**枚举白名单 + throw** —— 换 dsh 版本时要复查同类写法。
-- **自编译 node-pty 原生模块（2026-09-29）**：见 2.4。关键是三层：
-  ① 交叉编译（用 VM 的 clang-17 + OHOS SDK 的 sysroot/libcxx；SDK 自带的编译器是 x64，沙箱/VM 都是 aarch64 跑不了）；
-  ② `.codesign` 段（鸿蒙 dlopen 前校验代码签名；**占位段无效**，要用 `ohos-bst-light` 真自签名，
-     且 SDK 的 clang/lld 自动插的那个也是无效的）；
-  ③ 入库方式用**资产**而非 `replace`（`replace` 要求上游文件存在，而这是新增文件）。
-  脚本：`scripts/build-pty.mjs`（前提探测 → 自动下 node 头文件 → 编译 → 自签名 → 落 `pty-backend/`）。
-- **侧栏终端的复制/粘贴（2026-09-29）**：HTML 终端（xterm.js）里没有自定义快捷键，Ctrl+C 是 SIGINT、
-  Ctrl+V 受 Web 剪贴板限制。给 `dsh-client-ui-sidebar-terminal/lib/client.terminal.js` 打了补丁：
-  **选中后单击右键=复制、双击右键=粘贴、Ctrl+V=粘贴**（走 Web 剪贴板 API，不占系统权限），
-  并在面板底部显示一行操作提示。（初版用 Ctrl+Shift+C，与浏览器 DevTools 冲突，已弃用。）
-  注：客户端插件是运行时从 `/plugin/...` 加载的，WebView 会缓存 —— 改动要重装 hap 才生效。
