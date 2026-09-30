@@ -112,9 +112,20 @@ export PATH=/storage/Users/currentUser/.harmonybrew/opt/node@22/bin:$PATH
 
 ## 四、拿 dsh 的鸿蒙包
 
-有两种来源，任选其一。
+有三种来源，任选其一。
 
-### A. 自己构建（可复现，推荐）
+### A. 从 Release 下载（推荐，最省事）
+
+打开 <https://gitcode.com/chen-qiongmeng/dsh-harmony/releases>，
+下载 **`dsh-ohos-<版本>.zip`**（当前版本 **0.2.0-rc.2**），解开到文档目录即可：
+
+```sh
+unzip dsh-ohos-0.2.0-rc.2.zip -d /storage/Users/currentUser/Documents/dsh/
+```
+
+> Release 里没有你要的版本？走下面两条 —— 自己构建（B），或者用别人给的 zip（C）。
+
+### B. 自己构建（可复现）
 
 **除了 node，构建还要几个命令行工具**（`brew install node` 只给 node + npm/npx）：
 
@@ -153,7 +164,7 @@ node scripts/build-dsh.mjs 0.2.0-rc.2 --out /storage/Users/currentUser/Documents
 脚本会用 pnpm 拉官方 `@deepseek-ai/dsh` 再做替换/补资产（首次 1–2 分钟），
 跑完会打印产物大小并**自检**（14 个替换文件、rg shim、图片后端、`bin/dsh`）。
 
-### B. 用现成的 zip
+### C. 用别人给的 zip（或自己备份的）
 
 ```sh
 unzip dsh-ohos-0.2.0-rc.2.zip -d /storage/Users/currentUser/Documents/dsh/
@@ -286,3 +297,12 @@ dsh web: http://127.0.0.1:32114/?token=…                                  ← 
 ```
 
 同一组合还在 BitFun 环境里跑过一次（`node=v26.10.0  pkg=ok  pty=ohos-ok`），结果一致。
+
+---
+
+## 十、反馈
+
+- **下载 zip 包**：<https://gitcode.com/chen-qiongmeng/dsh-harmony/releases>
+- **提 Issue**（跑不起来、要适配新版本、发现问题）：<https://gitcode.com/chen-qiongmeng/dsh-harmony/issues>
+  带上这些信息最省事：设备与系统版本（`param get const.product.software.version`）、
+  `node -v`、出错命令与**完整报错原文**。
