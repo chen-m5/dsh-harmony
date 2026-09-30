@@ -74,6 +74,7 @@ const soft = (cmd, a) => {
 soft('chmod', ['755', join(dir, 'node_modules/@vscode/ripgrep-openharmony-arm64/bin/rg')])
 soft('chmod', ['-R', 'a+x', join(dir, 'node_modules/.bin')])
 soft('chmod', ['755', join(dir, 'bin/bash')])
+soft('chmod', ['755', join(dir, 'bin/dsh')])
 
 // 4. 自检：前三项是壳 verifyExternal() 硬性要查的（缺了会被拒）
 console.log('== 自检（壳预检会查这些）==')
@@ -82,6 +83,7 @@ const checks = [
   ['dsh 入口 bin.js', join(dir, 'node_modules/@deepseek-ai/dsh/lib/bin.js')],
   ['require-builtin JS 垫片', join(dir, 'node_modules/node-addon-require-builtin/lib/index.js')],
   ['rg shim（可直接 spawn）', join(dir, 'node_modules/@vscode/ripgrep-openharmony-arm64/bin/rg')],
+  ['命令行入口 bin/dsh', join(dir, 'bin/dsh')],
 ]
 for (const [label, p] of checks) {
   const ok = existsSync(p)

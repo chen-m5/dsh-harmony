@@ -227,6 +227,42 @@ for (const entry of ['bin', 'node_modules']) {
 // 包目录里的版本号文件：壳的「外挂包」读它把版本号显示出来（内置包有编译期常量，但保持一致；
 // 约定见壳仓库 PkgVersion.ets 的 PKG_VERSION_FILE）
 writeFileSync(join(stage, PKG_DIR_NAME, 'VERSION'), `${version}\n`);
+// 命令行入口 bin/dsh：让这个包在鸿蒙的**终端里能直接跑**（不依赖 HMDSH 壳）。
+// 三个环境坑都固化进脚本，免得每次手敲：
+//   · --expose-internals：dsh 启动器要拿 Node 内部模块
+//   · OPENSSL_armcap=0：OHOS/arm64 上 OpenSSL 的 CPU 能力探测会让进程起不来
+//   · TMPDIR：鸿蒙沙箱里没有可写的 /tmp，必须先兜底出一个可写目录
+const binDir = join(stage, PKG_DIR_NAME, 'bin');
+mkdirSync(binDir, { recursive: true });
+writeFileSync(join(binDir, 'dsh'), `#!/bin/sh
+# dsh 命令行入口（由 dsh-harmony/scripts/build-dsh.mjs 生成）
+# 用法：dsh web [--port 32100] / dsh --profile headless "..."
+set -u
+PKG_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+
+OPENSSL_armcap=0
+export OPENSSL_armcap
+
+if [ -z "\${TMPDIR:-}" ] || [ ! -d "\${TMPDIR:-}" ] || [ ! -w "\${TMPDIR:-}" ]; then
+  TMPDIR="\${HOME:-$PKG_DIR}/.dsh-tmp"
+  mkdir -p "$TMPDIR" 2>/dev/null || true
+  export TMPDIR
+fi
+
+NODE=$(command -v node 2>/dev/null || true)
+if [ -z "$NODE" ]; then
+  for c in "$PKG_DIR/node-bin/node" /data/service/hnp/bin/node /usr/bin/node; do
+    if [ -x "$c" ]; then NODE="$c"; break; fi
+  done
+fi
+if [ -z "$NODE" ]; then
+  echo "dsh: 找不到 node。装一个（例如 harmonybrew: brew install node）或把它放进 PATH 再试。" >&2
+  exit 127
+fi
+
+exec "$NODE" --expose-internals "$PKG_DIR/node_modules/@deepseek-ai/dsh/lib/bin.js" "$@"
+`, { mode: 0o755 });
+console.log('  · bin/dsh（命令行入口）');
 rmSync(out, { force: true })
 execFileSync('zip', ['-r', '-q', out, PKG_DIR_NAME], { cwd: stage, stdio: 'inherit' })
 rmSync(stage, { recursive: true, force: true })
