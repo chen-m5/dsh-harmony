@@ -68,9 +68,9 @@
     },
     {
       "path": "node_modules/@deepseek-ai/node-addon-system/lib/flock.js",
-      "sha256": "0fb7e88635b91a512d37771ef7a4d72d8fcf47dd86c7d2dc5f4865ba14550ecc",
+      "sha256": "ac383b80f325546e6d3233e8f1d22ed84f7d3b3eeff8091ebbb33096f9cd3d4d",
       "upstreamSha256": "e42af00c298d56322c073bf7cc66485096028318ab645a2e69dc2aa7481ba646",
-      "reason": "上游同名同版本重发后内容变了，用现役可跑的那份（node-addon-require-builtin 新版会让 dsh 起不来）"
+      "reason": "鸿蒙上 flock(2) 与 hmdfs 锁都不可靠：openharmony 时打桩成立即成功（只保留进程内写声明，放弃跨进程排他）。照 harmonybrew 的 dsh bottle 简化，省掉自造平台包"
     },
     {
       "path": "node_modules/node-addon-require-builtin/lib/index.js",
@@ -89,6 +89,12 @@
       "sha256": "d0f294c0815c41a3c3701438bc4e7606e01cb931b54ee590d42f90b6a0192b2f",
       "reason": "侧栏终端的复制/粘贴改用鼠标与 Ctrl+V：**选中后单击右键=复制**、**双击右键=粘贴**、Ctrl+V=粘贴（走 Web 剪贴板 API，不占系统权限）；Ctrl+C 保持 SIGINT 不拦。面板底部显示操作提示。（先试过 Ctrl+Shift+C，与浏览器 DevTools 冲突，已弃用。）",
       "upstreamSha256": "5cfb1b93c7d3f2710e99610ef596d30064a603e78450da1ad61b9bb53f750fa5"
+    },
+    {
+      "path": "node_modules/@deepseek-ai/dsh-credentials-local/lib/index.js",
+      "sha256": "b9989163e2a2365b5c19e7f9c77fc1a5729b3cbe25b4a96d5a5e9e7bf843667e",
+      "reason": "鸿蒙共享盘（hmdfs）挂载固定 660，chmod 600 不生效 → 凭据文件的 owner-only 检查必然失败、拒绝启动。照上游给 win32 的豁免，同样豁免 openharmony（凭据文件仍只对 file_manager 组的应用可见）",
+      "upstreamSha256": "1688f17801d5809abace4ef6228b771625a0153c043d7d4dba21b398ec4056eb"
     }
   ],
   "imageBackend": {
@@ -107,8 +113,8 @@
     "source": "native/node_modules",
     "target": "node_modules",
     "note": "openharmony-arm64 平台专用包，公共 registry 上没有，作为资产入库（见 native/README.md）",
-    "files": 5,
-    "sha256": "54dbe1507e7460e0d69c1e0877d4e378e7a50989b276e8273d7170bd636df473"
+    "files": 2,
+    "sha256": "49b0e265f37e31b8fe78df187846fc07a8bf44ba8f8f79dde0c316f7e9020139"
   },
   "binAssets": {
     "source": "bin",
