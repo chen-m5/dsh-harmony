@@ -1,12 +1,16 @@
 # 在鸿蒙设备上跑 dsh（命令行 + 浏览器）
 
-在**设备本机**用命令行起一个 dsh 服务，再用系统浏览器打开它的 Web UI —— 全程不依赖 HMDSH 壳。
+在**设备本机**用命令行起一个 dsh 服务，再用系统浏览器打开它的 Web UI —— 全程不依赖 HMDSH。
 
 ```
 装 harmonybrew  →  brew install node  →  拿本仓库的鸿蒙包  →  bin/dsh web  →  浏览器打开
 ```
 
 适用：鸿蒙 PC、或任何有终端环境、且系统版本达标的 HarmonyOS 设备。
+
+> **这是与 HMDSH 并列的另一条路线。**
+> HMDSH 是「应用内托管 dsh + ArkWeb 内嵌 UI」；本文是「设备终端里手动起 dsh + 系统浏览器访问」。
+> 两条路线**用的是同一份改造包**，区别只在"谁把它跑起来、用什么渲染" —— 对照见第七节。
 
 ---
 
@@ -29,7 +33,7 @@ export PATH=/storage/Users/currentUser/.harmonybrew/bin:$PATH
 ```
 
 > **必须在含 `file_manager(1006)` 组的环境里执行**（PC 终端 / DevEco Studio 的终端 / BitFun 这类）。
-> 普通应用沙箱（例如 HMDSH 壳内部）访问 `.harmonybrew` 会 `Operation not permitted`，
+> 普通应用沙箱（例如 HMDSH 内部）访问 `.harmonybrew` 会 `Operation not permitted`，
 > 而且**绕不过去**（`chmod 777` 无效、软链也无效）。详见第一节。
 
 下面是每一步的展开说明、常见问题与实测记录。
@@ -51,7 +55,7 @@ export PATH=/storage/Users/currentUser/.harmonybrew/bin:$PATH
 | 环境 | 在 `file_manager(1006)` 组 | 能否访问 `.harmonybrew` |
 |---|---|---|
 | 鸿蒙 PC 的终端 / DevEco Studio 的终端 / BitFun 这类开发工具 | ✅ | ✅ |
-| **普通应用沙箱**（例如 HMDSH 壳内部） | ❌ | ❌ `Operation not permitted` |
+| **普通应用沙箱**（例如 HMDSH 内部） | ❌ | ❌ `Operation not permitted` |
 
 普通应用的沙箱里**没有任何办法绕过去**：`chmod 777` 无效（不是权限位问题），
 软链也不行（授权按最终解析路径查，实测两个方向都 EPERM）。所以下面这些步骤
@@ -162,7 +166,7 @@ dsh web: http://127.0.0.1:32200/?token=XXXXXXXX
 
 node 依次从 `PATH` → 包内 `node-bin` → 系统常见位置找，都找不到才报错，并会告诉你怎么办。
 
-> 端口别用 **32100** —— HMDSH 壳自己那套跑在那儿。
+> 端口别用 **32100** —— HMDSH 自己那套跑在那儿。
 
 ---
 
@@ -182,18 +186,18 @@ if (!('dshDesktop' in globalThis)) return
 所以第一次要这样配模型：**在 `dsh web` 的 Models 页填 API key** ——
 它会写进 `~/.dsh/settings.yaml` 与 `~/.dsh/.credentials.yaml`，之后就一直可用。
 
-（HMDSH 壳里之所以有账号菜单，是因为壳注入了一个 `dshDesktop` 垫片。）
+（HMDSH 里之所以有账号菜单，是因为它注入了一个 `dshDesktop` 垫片。）
 
 ---
 
-## 七、和 HMDSH 壳的关系
+## 七、与 HMDSH 的关系（两条路线对照）
 
-| | 本流程（命令行 + 浏览器） | HMDSH 壳 |
+| | 本流程（命令行 + 浏览器） | HMDSH |
 |---|---|---|
-| dsh 跑在 | 设备上，由你手动起/停 | 设备上，壳托管（内置包 + 生命周期）|
+| dsh 跑在 | 设备上，由你手动起/停 | 设备上，HMDSH 托管（内置包 + 生命周期）|
 | UI | 系统浏览器 | ArkWeb 内嵌 |
 | 需要的权限 | 终端环境（`file_manager` 组）| 普通应用即可 |
-| 账号 UI | ❌ 需用 API key | ✅（壳注入垫片）|
+| 账号 UI | ❌ 需用 API key | ✅（HMDSH 注入垫片）|
 | 终端 / 图片附件 | ✅ 用本仓库的包 | ✅ |
 
 两者**用的是同一份改造包**，区别只在"谁把它跑起来、用什么渲染"。
@@ -209,7 +213,7 @@ if (!('dshDesktop' in globalThis)) return
 | `dsh: 找不到 node。装一个…` | PATH 里没有 node：先 `eval "$(brew shellenv)"`，或把 node 加到 PATH |
 | `Error loading shared library libXXX.so` | 拿错了包 —— 那是 harmonybrew 装在**非默认前缀**下的 bottle 才会有的问题；本流程用的 dsh 包自带依赖，不该出现 |
 | 网页打开报 401 | URL 少了 `?token=…`。token 每次启动都变，要重新复制 |
-| 端口被占 | 换 `--port`（壳占 32100）|
+| 端口被占 | 换 `--port`（HMDSH 占 32100）|
 | 侧栏终端报错 / 图片附件失败 | 你用的可能是 harmonybrew 官方那版 dsh（缺 ohos pty prebuild、缺图片后端）。换成本仓库的包 |
 
 ---
