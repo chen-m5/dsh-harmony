@@ -36,6 +36,17 @@ node scripts/build-dsh.mjs 0.2.0-rc.2      # 出 dsh-ohos.zip（顶层目录 dsh
 node scripts/verify-dsh.mjs dsh-ohos.zip
 ```
 
+## 在鸿蒙设备上跑（命令行 + 浏览器）
+
+不想用 HMDSH 壳、想直接在设备终端里起 dsh？见 **[docs/在鸿蒙上跑-dsh.md](docs/在鸿蒙上跑-dsh.md)**：
+
+```
+装 harmonybrew → brew install node → 拿本仓库的鸿蒙包 → bin/dsh web → 浏览器打开
+```
+
+文档里写了权限前提（`.harmonybrew` 只有含 `file_manager` 组的环境能访问，应用沙箱内不行）、
+`bin/dsh` 已固化的三个鸿蒙坑、浏览器下的账号 UI 限制，以及实测记录。
+
 ## 许可与免责
 
 上游以 MIT 发布（见 `LICENSE`）；本仓库的改造与脚本同样以 MIT 提供，并保留上游版权与许可声明。
