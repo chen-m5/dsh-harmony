@@ -6,6 +6,32 @@
 - 运行它的鸿蒙壳（HMDSH）：<https://gitcode.com/chen-qiongmeng/dsh-harmonyos-app>
 - **本仓库不含 dsh 源码**：打包时用 pnpm 拉官方包，再按版本目录里的清单做替换/新增 —— 仓库只有几 MB，且"我们改了什么"一目了然。
 
+## 在鸿蒙设备上跑起来（命令行 + 浏览器）
+
+不想用 HMDSH 壳、想直接在设备终端里起 dsh，三步：
+
+```sh
+# 1) 装 harmonybrew（Homebrew 的鸿蒙移植）+ node（需要 ≥ 20.12）
+zsh -c "$(curl -fsSL https://harmonybrew.atomgit.com/install.sh)"
+eval "$(/storage/Users/currentUser/.harmonybrew/bin/brew shellenv)"
+brew install node
+
+# 2) 拿本仓库的鸿蒙包（自己构建；已有 zip 的话直接解压到 Documents/dsh/ 即可）
+git clone https://gitcode.com/chen-qiongmeng/dsh-harmony.git && cd dsh-harmony
+node scripts/build-dsh.mjs 0.2.0-rc.2 --out /storage/Users/currentUser/Documents/dsh/dsh-ohos-0.2.0-rc.2.zip
+
+# 3) 起服务，把打印出来的 URL（带 token）粘进系统浏览器
+export PATH=/storage/Users/currentUser/.harmonybrew/bin:$PATH
+/storage/Users/currentUser/Documents/dsh/dsh-ohos-0.2.0-rc.2/bin/dsh web --no-open --port 32200
+#   → dsh web: http://127.0.0.1:32200/?token=…
+```
+
+⚠ 必须在**含 `file_manager(1006)` 组的环境**里跑（PC 终端 / DevEco 终端 / BitFun 这类）——
+普通应用沙箱访问 `.harmonybrew` 会 `Operation not permitted`，`chmod 777` 与软链都绕不过去。
+
+完整说明（权限前提、get 包、常见问题、与 HMDSH 壳的对照、实测记录）见
+**[docs/在鸿蒙上跑-dsh.md](docs/在鸿蒙上跑-dsh.md)**。
+
 ## 目录
 
 ```
@@ -35,17 +61,6 @@ node scripts/fetch-dsh.mjs 0.2.0-rc.2      # 拉官方包到 work/0.2.0-rc.2/
 node scripts/build-dsh.mjs 0.2.0-rc.2      # 出 dsh-ohos.zip（顶层目录 dsh-ohos-0.2.0-rc.2/）
 node scripts/verify-dsh.mjs dsh-ohos.zip
 ```
-
-## 在鸿蒙设备上跑（命令行 + 浏览器）
-
-不想用 HMDSH 壳、想直接在设备终端里起 dsh？见 **[docs/在鸿蒙上跑-dsh.md](docs/在鸿蒙上跑-dsh.md)**：
-
-```
-装 harmonybrew → brew install node → 拿本仓库的鸿蒙包 → bin/dsh web → 浏览器打开
-```
-
-文档里写了权限前提（`.harmonybrew` 只有含 `file_manager` 组的环境能访问，应用沙箱内不行）、
-`bin/dsh` 已固化的三个鸿蒙坑、浏览器下的账号 UI 限制，以及实测记录。
 
 ## 许可与免责
 

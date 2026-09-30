@@ -10,6 +10,32 @@
 
 ---
 
+## 快速开始（先把命令跑起来）
+
+```sh
+# 1) 装 harmonybrew（Homebrew 的鸿蒙移植）+ node（需要 ≥ 20.12）
+zsh -c "$(curl -fsSL https://harmonybrew.atomgit.com/install.sh)"
+eval "$(/storage/Users/currentUser/.harmonybrew/bin/brew shellenv)"
+brew install node && node -v
+
+# 2) 拿包：自己构建（已有 zip 的话，解压到 Documents/dsh/ 即可）
+git clone https://gitcode.com/chen-qiongmeng/dsh-harmony.git && cd dsh-harmony
+node scripts/build-dsh.mjs 0.2.0-rc.2 --out /storage/Users/currentUser/Documents/dsh/dsh-ohos-0.2.0-rc.2.zip
+
+# 3) 起服务（前台跑着），把打印出来的 URL **连 token 一起**粘进系统浏览器
+export PATH=/storage/Users/currentUser/.harmonybrew/bin:$PATH
+/storage/Users/currentUser/Documents/dsh/dsh-ohos-0.2.0-rc.2/bin/dsh web --no-open --port 32200
+#   → dsh web: http://127.0.0.1:32200/?token=…
+```
+
+> **必须在含 `file_manager(1006)` 组的环境里执行**（PC 终端 / DevEco Studio 的终端 / BitFun 这类）。
+> 普通应用沙箱（例如 HMDSH 壳内部）访问 `.harmonybrew` 会 `Operation not permitted`，
+> 而且**绕不过去**（`chmod 777` 无效、软链也无效）。详见第一节。
+
+下面是每一步的展开说明、常见问题与实测记录。
+
+---
+
 ## 一、前置条件
 
 | 项 | 要求 | 怎么确认 |
