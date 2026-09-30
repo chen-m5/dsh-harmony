@@ -25,7 +25,7 @@
     },
     {
       "path": "node_modules/@deepseek-ai/dsh-client-ui-settings-account/lib/client.js",
-      "sha256": "ec4bbe0b3724f411cc895a49e13cd2319740187f991acb36117939ad0f6f82b9",
+      "sha256": "9f4eed27a0ee6784d4d58009ade6ca1615c1a04148cbcf2837a9f5aed5ffa107",
       "upstreamSha256": "81b0b302cc2ad65f75350e68d25f0ea946cc084702cac47dc195e72924c3772d",
       "bytes": 5281400,
       "note": " | 2026-09-28：余额改为登录后才拉（未登录不空跑）"
