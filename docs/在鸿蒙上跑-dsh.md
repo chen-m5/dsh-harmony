@@ -155,7 +155,7 @@ node scripts/build-dsh.mjs 0.2.0-rc.2 --out /storage/Users/currentUser/Documents
 ```
 
 脚本会用 pnpm 拉官方 `@deepseek-ai/dsh` 再做替换/补资产（首次 1–2 分钟），
-跑完会打印产物大小并**自检**（13 个替换文件、rg shim、图片后端、`bin/dsh`）。
+跑完会打印产物大小并**自检**（14 个替换文件、rg shim、图片后端、`bin/dsh`）。
 
 ### B. 用现成的 zip
 
@@ -257,6 +257,8 @@ if (!('dshDesktop' in globalThis)) return
 |---|---|
 | `ls: …/.harmonybrew: Operation not permitted` | 当前环境不在 `file_manager` 组（典型：应用沙箱内）。换到有该组的环境执行 |
 | `SyntaxError: util.parseEnv` | Node 太老（< 20.12）。`node -v` 确认，必要时 `brew install node` |
+| `credentials-local: … is readable beyond its owner (mode 660)` | 共享盘（hmdfs）挂载固定 660、`chmod 600` 不生效 —— 环境限制，改权限没用。**本仓库的包已对 openharmony 豁免这项检查**；会报这个说明手上不是本仓库这份包 |
+| 启动报 `startup failed: … Failed plugins (1): credentials` | 上一条的后果（凭据插件不激活）。换成本仓库的包即可 |
 | `dsh: 找不到 node。装一个…` | PATH 里没有 node：先 `eval "$(brew shellenv)"`，或把 node 加到 PATH |
 | `…/bin/dsh:2` + `SyntaxError: Invalid or unexpected token` | **在 `bin/dsh` 前面多写了 `node`**。它是 shell 脚本，直接执行（或 `sh …/bin/dsh …`）—— 见第五节 |
 | 构建时 `pnpm: command not found` | **`brew install node` 只带 node/npm，不带 pnpm** → `brew install pnpm`（或 `npm i -g pnpm`）|

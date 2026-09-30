@@ -89,6 +89,12 @@
       "sha256": "d0f294c0815c41a3c3701438bc4e7606e01cb931b54ee590d42f90b6a0192b2f",
       "reason": "侧栏终端的复制/粘贴改用鼠标与 Ctrl+V：**选中后单击右键=复制**、**双击右键=粘贴**、Ctrl+V=粘贴（走 Web 剪贴板 API，不占系统权限）；Ctrl+C 保持 SIGINT 不拦。面板底部显示操作提示。（先试过 Ctrl+Shift+C，与浏览器 DevTools 冲突，已弃用。）",
       "upstreamSha256": "5cfb1b93c7d3f2710e99610ef596d30064a603e78450da1ad61b9bb53f750fa5"
+    },
+    {
+      "path": "node_modules/@deepseek-ai/dsh-credentials-local/lib/index.js",
+      "sha256": "b9989163e2a2365b5c19e7f9c77fc1a5729b3cbe25b4a96d5a5e9e7bf843667e",
+      "reason": "鸿蒙共享盘（hmdfs）挂载固定 660，chmod 600 不生效 → 凭据文件的 owner-only 检查必然失败、拒绝启动。照上游给 win32 的豁免，同样豁免 openharmony（凭据文件仍只对 file_manager 组的应用可见）",
+      "upstreamSha256": "1688f17801d5809abace4ef6228b771625a0153c043d7d4dba21b398ec4056eb"
     }
   ],
   "imageBackend": {
@@ -98,7 +104,7 @@
     "sha256": "7062b2e1a1150f5f4e90af17d00852c0c21ca158d79fa9828b03d2e9c6e1a649"
   },
   "binAlias": {
-    "note": "pnpm hoisted 生成的是 node_modules/.bin/，壳里用的是 node_modules/bin/（无点）—— 打包时改名/复制",
+    "note": "pnpm hoisted 生成的是 node_modules/.bin/，而运行时用的是 node_modules/bin/（无点）—— 打包时改名/复制",
     "from": "node_modules/.bin",
     "to": "node_modules/bin"
   },
@@ -113,7 +119,7 @@
   "binAssets": {
     "source": "bin",
     "target": "bin",
-    "note": "壳要用的顶层 bin/（bash shim），官方包不含；见 bin/README.md",
+    "note": "顶层 bin/（bash shim，运行时用），官方包不含；见 bin/README.md",
     "files": 2,
     "sha256": "e57a99d738b8cb86c53b146de0145e1cf3e4ba908eb1944d83add51a2d934797"
   },
