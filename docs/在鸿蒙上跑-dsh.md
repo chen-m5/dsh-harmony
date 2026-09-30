@@ -292,3 +292,24 @@ dsh web: http://127.0.0.1:32114/?token=…                                  ← 
 - **提 Issue**（跑不起来、要适配新版本、发现问题）：<https://gitcode.com/chen-qiongmeng/dsh-harmony/issues>
   带上这些信息最省事：设备与系统版本（`param get const.product.software.version`）、
   `node -v`、出错命令与**完整报错原文**。
+
+## 十一、浏览器里想看到「账户」那一块？
+
+dsh 的账户 UI（`dsh-client-ui-settings-account`）上游**只在桌面壳里注册**：
+
+```js
+if (!("dshDesktop" in globalThis)) return;
+```
+
+所以纯浏览器（`dsh web` 这条路）默认**看不到账户 UI**（侧栏没有账号菜单、设置里也没有「账号」）。
+本仓库给它加了一个**显式开关**，默认保持上游行为（关）：
+
+```js
+// 推荐：一次设置长期有效，且不受重定向影响
+localStorage.setItem("dsh.accountUi", "1");        // 关闭：localStorage.removeItem("dsh.accountUi")
+```
+
+⚠ 另一种临时方式是在地址栏追加 `?dshAccountUi=1`，但**必须"先打开 dsh 页面、再在当前地址栏追加"** ——
+直接把带参数的完整 URL 粘进新标签页，会被 dsh 启动时的那次跳转把 query 丢掉，等于没加。
+
+更详细的前因后果见 HMDSH 壳仓库的 `docs/账号登录.md`（§三之三）。
