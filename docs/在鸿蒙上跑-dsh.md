@@ -190,6 +190,13 @@ export PATH=/storage/Users/currentUser/.harmonybrew/bin:$PATH
 dsh web: http://127.0.0.1:32200/?token=XXXXXXXX
 ```
 
+> ⚠ **别在它前面加 `node`。** `bin/dsh` 是个 **shell 脚本**（`#!/bin/sh`），直接执行即可；
+> 写成 `node …/bin/dsh web …` 会让 node 去解析一个 shell 脚本，报
+> `SyntaxError: Invalid or unexpected token`（脚本第 2 行的 `#` 注释对 JS 不是合法 token）——
+> 这是最容易踩的一个误用。
+>
+> 不方便直接执行时（例如拷贝后丢了执行位），用 `sh …/bin/dsh web …` 也一样。
+
 `bin/dsh` 已经替你做掉三件鸿蒙上必须的事，不用自己记：
 
 | 它做了什么 | 为什么 |
@@ -231,6 +238,7 @@ if (!('dshDesktop' in globalThis)) return
 | `ls: …/.harmonybrew: Operation not permitted` | 当前环境不在 `file_manager` 组（典型：应用沙箱内）。换到有该组的环境执行 |
 | `SyntaxError: util.parseEnv` | Node 太老（< 20.12）。`node -v` 确认，必要时 `brew install node` |
 | `dsh: 找不到 node。装一个…` | PATH 里没有 node：先 `eval "$(brew shellenv)"`，或把 node 加到 PATH |
+| `…/bin/dsh:2` + `SyntaxError: Invalid or unexpected token` | **在 `bin/dsh` 前面多写了 `node`**。它是 shell 脚本，直接执行（或 `sh …/bin/dsh …`）—— 见第五节 |
 | 构建时 `pnpm: command not found` | **`brew install node` 只带 node/npm，不带 pnpm** → `brew install pnpm`（或 `npm i -g pnpm`）|
 | `zip: command not found` / 解压失败 | 同上：`brew install zip unzip` |
 | `git: command not found` | 只有用命令行克隆时才需要：`brew install git`。**不想装 git 就在仓库页面点「克隆/下载」拿 zip 解开** |
