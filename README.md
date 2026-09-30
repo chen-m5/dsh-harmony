@@ -3,12 +3,11 @@
 **DeepSeek Harness（dsh）的 HarmonyOS / OpenHarmony 适配层**：改造过的文件 + 图片处理后端 + 新增插件 + 打包脚本。
 
 - 上游：`@deepseek-ai/dsh` **0.2.0-rc.2**（MIT）
-- 运行它的鸿蒙端应用（HMDSH）：<https://gitcode.com/chen-qiongmeng/dsh-harmonyos-app>
 - **本仓库不含 dsh 源码**：打包时用 pnpm 拉官方包，再按版本目录里的清单做替换/新增 —— 仓库只有几 MB，且"我们改了什么"一目了然。
 
 ## 在鸿蒙设备上跑起来（命令行 + 浏览器）
 
-不想用 HMDSH、想直接在设备终端里起 dsh，三步：
+想在设备的终端里直接起 dsh？三步：
 
 ```sh
 # 1) 装 harmonybrew（Homebrew 的鸿蒙移植）+ node（需要 ≥ 20.12）
@@ -34,7 +33,7 @@ export PATH=/storage/Users/currentUser/.harmonybrew/bin:$PATH
 ⚠ 必须在**含 `file_manager(1006)` 组的环境**里跑（PC 终端 / DevEco 终端 / BitFun 这类）——
 普通应用沙箱访问 `.harmonybrew` 会 `Operation not permitted`，`chmod 777` 与软链都绕不过去。
 
-完整说明（权限前提、get 包、常见问题、与 HMDSH 的对照、实测记录）见
+完整说明（权限前提、拿包、常见问题、实测记录）见
 **[docs/在鸿蒙上跑-dsh.md](docs/在鸿蒙上跑-dsh.md)**。
 
 ## 目录
@@ -52,7 +51,7 @@ scripts/                    顶层：**共用件**
   files/                    ★ 改造过的文件（保留包内相对路径，如 node_modules/@deepseek-ai/<包>/lib/x.js）
   image-backend/            ★ 图片后端（jimp 依赖闭包，替换掉 OHOS 上用不了的 sharp）
   native/                   ★ OHOS(openharmony-arm64) 平台专用包（公共 registry 上没有；现只剩 rg shim）
-  bin/                      ★ HMDSH 要用的顶层 bin/（bash shim）
+  bin/                      ★ 顶层 bin/（bash shim，运行时用）
   plugins/                  ★ 新增/替换的 dsh 插件（每插件一目录 + plugins.json）
   CHANGES.md                ★ 这个版本改了什么、为什么
 ```
