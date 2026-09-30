@@ -162,7 +162,7 @@ node scripts/build-dsh.mjs 0.2.0-rc.2 --out /storage/Users/currentUser/Documents
 ```
 
 脚本会用 pnpm 拉官方 `@deepseek-ai/dsh` 再做替换/补资产（首次 1–2 分钟），
-跑完会打印产物大小并**自检**（12 个替换文件、rg shim、图片后端、`bin/dsh`）。
+跑完会打印产物大小并**自检**（13 个替换文件、rg shim、图片后端、`bin/dsh`）。
 
 ### C. 用别人给的 zip（或自己备份的）
 

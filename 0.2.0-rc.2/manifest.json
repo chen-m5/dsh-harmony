@@ -83,6 +83,12 @@
       "sha256": "b9989163e2a2365b5c19e7f9c77fc1a5729b3cbe25b4a96d5a5e9e7bf843667e",
       "reason": "鸿蒙共享盘（hmdfs）挂载固定 660，chmod 600 不生效 → 凭据文件的 owner-only 检查必然失败、拒绝启动。照上游给 win32 的豁免，同样豁免 openharmony（凭据文件仍只对 file_manager 组的应用可见）",
       "upstreamSha256": "1688f17801d5809abace4ef6228b771625a0153c043d7d4dba21b398ec4056eb"
+    },
+    {
+      "path": "node_modules/@deepseek-ai/dsh-session-persistence-jsonl/lib/index.js",
+      "sha256": "696dc1a626723bc538e7e8a0b3099d5660293186d7a53d713fee5e4dd8ddebb0",
+      "reason": "共享盘（hmdfs）不支持 link(2)（EPERM）→ 会话存档 session.v4.jsonl.zstd 直接写不进去。命中 EPERM/EOPNOTSUPP/ENOSYS/EXDEV 时退化成 rename 发布（目标是否已存在由 rejectExistingLog 判过）；其余错误照旧抛",
+      "upstreamSha256": "0845707017acc2b4a8a75eab2244fa3fd88587b8094ab32014321dce7ca1e31b"
     }
   ],
   "imageBackend": {

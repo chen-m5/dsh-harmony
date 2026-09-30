@@ -14,7 +14,7 @@
 | 项 | 值 |
 |---|---|
 | 上游 | `@deepseek-ai/dsh` **0.2.0-rc.2**（MIT） |
-| 改造形态 | **12 个文件整文件替换** + 4 类随包资产（不是 patch 重放） |
+| 改造形态 | **13 个文件整文件替换** + 4 类随包资产（不是 patch 重放） |
 | 本仓库不含 | dsh 源码、dsh 包体 —— 打包时用 pnpm 拉官方包，再按本清单替换/新增 |
 | 上次更新 | 2026-09-30（从 0.1.7-rc.2 升上来，含真机验收） |
 
@@ -47,7 +47,7 @@
 > `linux-x64/arm64`（glibc+musl）与 `darwin-x64/arm64`；全仓库 grep `openharmony` = **0 处**。
 > 所以「纯 JS 垫片 + 平台白名单 + 自造平台包」这三条**一个都不能少**。
 
-### 2.2 替换的 12 个文件（= `files/`，保留包内相对路径）
+### 2.2 替换的 13 个文件（= `files/`，保留包内相对路径）
 
 `manifest.json` 的 `replace[]` 逐项记着**官方原文件 sha256**（`upstreamSha256`）与**我们这份 sha256**；
 `build-dsh.mjs` 每次打包前校验「官方树确实是官方原样」，不符就**报错停下**。
@@ -67,7 +67,8 @@
 | 11 | `@deepseek-ai/dsh-client-ui-sidebar-terminal/lib/client.terminal.js` | 终端复制/粘贴改用鼠标与 Ctrl+V：选中后**单击右键=复制**、双击右键=粘贴、Ctrl+V=粘贴（走 Web 剪贴板，不占系统权限）；Ctrl+C 保持 SIGINT 不拦；底部显示操作提示 | 体验 |
 | 12 | `@deepseek-ai/dsh-credentials-local/lib/index.js` | **owner-only 检查豁免 `openharmony`**：鸿蒙共享盘（hmdfs）挂载固定 660，`chmod 600` 不生效 → 原检查必然失败 → `credentials` 插件不激活 → **启动直接失败**。照上游给 `win32` 的豁免，同样豁免 `openharmony`（凭据文件仍只对 `file_manager` 组的应用可见）| **必需**（DSH_HOME 落在共享盘时）|
 
-> 这 12 个都是**我们的改动**（不是官方内容）—— 升级时可用改动特征自查：
+| 13 | `@deepseek-ai/dsh-session-persistence-jsonl/lib/index.js` | **硬链接降级**：会话存档用 `link(2)` 原子发布新文件，共享盘（hmdfs）不支持硬链接 → 报 `EPERM … link`，**会话根本存不下来**。命中 `EPERM`/`EOPNOTSUPP`/`ENOSYS`/`EXDEV` 时退化成 `rename` 发布（目标是否已存在由上面的 `rejectExistingLog()` 判过） | **必需**（DSH_HOME 落在共享盘时）|
+> 这 13 个都是**我们的改动**（不是官方内容）—— 升级时可用改动特征自查：
 > `flock.js` 里的 `'openharmony'`、`dshShell.openLogin`、`js-shim`、
 > `@jimp/core` 的懒加载在**官方原文件里都应该是 0 处**。
 
@@ -147,7 +148,7 @@ node scripts/build-dsh.mjs 0.2.0-rc.2 --clean          # 清中间产物（work/
 | 能力抽查 | ✅ `require-builtin` 垫片拿到 `internal/modules/esm/loader`；rg shim（`--json --regexp` / `--files`）正常；jimp 闭包（core/js-png/js-jpeg/plugin-resize）可解析；`node-pty` 可加载。<br>（`flock` 原为「真加锁」，2026-09-30 起改为**打桩**：`tryLockExclusive(fd)` 在 `openharmony` 上立即 resolve，实测 0 ms） |
 | `write` 工具写**共享盘**新文件 | ✅ 落地成功（无 `EPERM … link`） |
 | 硬错误扫描 | ✅ 无 `plugin tree failed to load` / `Cannot find module` / `[execve 失败]` / `Error loading shared library` |
-| 产物自检 | ✅ 65.1 MiB、25229 条目、12 个替换文件与图片后端 sha256 全中 |
+| 产物自检 | ✅ 65.1 MiB、25229 条目、13 个替换文件与图片后端 sha256 全中 |
 
 对照：`0.1.7-rc.2` ✅ 起得来；`0.1.5-rc.3` ❌ `plugin tree failed to load`（原生模块缺失被硬判死）。
 
