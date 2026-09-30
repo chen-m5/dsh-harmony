@@ -2,7 +2,7 @@
 
 **DeepSeek Harness（dsh）的 HarmonyOS / OpenHarmony 适配层**：改造过的文件 + 图片处理后端 + 新增插件 + 打包脚本。
 
-- 上游：`@deepseek-ai/dsh` **0.1.7-rc.2**（MIT）
+- 上游：`@deepseek-ai/dsh` **0.2.0-rc.2**（MIT）
 - 运行它的鸿蒙壳（HMDSH）：<https://gitcode.com/chen-qiongmeng/dsh-harmonyos-app>
 - **本仓库不含 dsh 源码**：打包时用 pnpm 拉官方包，再按版本目录里的清单做替换/新增 —— 仓库只有几 MB，且"我们改了什么"一目了然。
 
@@ -20,7 +20,7 @@ scripts/                    顶层：**共用件**
   manifest.json             上游版本 + 替换/资产清单 + sha256 校验基线
   files/                    ★ 改造过的文件（保留包内相对路径，如 node_modules/@deepseek-ai/<包>/lib/x.js）
   image-backend/            ★ 图片后端（jimp 依赖闭包，替换掉 OHOS 上用不了的 sharp）
-  native/                   ★ OHOS(openharmony-arm64) 平台专用包（公共 registry 上没有）
+  native/                   ★ OHOS(openharmony-arm64) 平台专用包（公共 registry 上没有；现只剩 rg shim）
   bin/                      ★ 壳要用的顶层 bin/（bash shim）
   plugins/                  ★ 新增/替换的 dsh 插件（每插件一目录 + plugins.json）
   CHANGES.md                ★ 这个版本改了什么、为什么
@@ -31,8 +31,8 @@ scripts/                    顶层：**共用件**
 ## 用法
 
 ```sh
-node scripts/fetch-dsh.mjs 0.1.7-rc.2      # 拉官方包到 work/0.1.7-rc.2/
-node scripts/build-dsh.mjs 0.1.7-rc.2      # 出 dsh-ohos.zip（顶层目录 dsh-ohos-0.1.7-rc.2/）
+node scripts/fetch-dsh.mjs 0.2.0-rc.2      # 拉官方包到 work/0.2.0-rc.2/
+node scripts/build-dsh.mjs 0.2.0-rc.2      # 出 dsh-ohos.zip（顶层目录 dsh-ohos-0.2.0-rc.2/）
 node scripts/verify-dsh.mjs dsh-ohos.zip
 ```
 

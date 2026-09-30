@@ -160,7 +160,13 @@ checkAsset('OHOS 原生包', na, join(ROOT, version, manifest.nativeAssets?.sour
 if (na) {
   console.log(`== 3.5/6 拷 OHOS 原生包 → ${na.target} ==`)
   cpSync(join(ROOT, version, na.source), join(work, na.target), { recursive: true })
-  console.log(`  · ${readdirSync(join(ROOT, version, na.source, '@deepseek-ai')).length + readdirSync(join(ROOT, version, na.source, '@vscode')).length} 个平台包`)
+  // 计数要容忍某个 scope 目录整个不存在：2026-09-30 起 flock 改成打桩，
+  // 自造的 @deepseek-ai/node-addon-system-openharmony-arm64 已删除，
+  // 现在 native/ 里只剩 @vscode/ripgrep-openharmony-arm64。
+  const countPkgs = (scope) => {
+    try { return readdirSync(join(ROOT, version, na.source, scope)).length } catch (e) { return 0 }
+  }
+  console.log(`  · ${countPkgs('@deepseek-ai') + countPkgs('@vscode')} 个平台包`)
 }
 
 // 3.6 pty 原生模块（自己为鸿蒙编的；node-pty 自带 prebuilds 只有 darwin/linux/win32）

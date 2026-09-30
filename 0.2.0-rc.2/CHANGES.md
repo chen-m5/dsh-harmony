@@ -55,7 +55,7 @@
 | # | 文件（`node_modules/` 下） | 改了什么 | 必需性 |
 |---|---|---|---|
 | 1 | `node-addon-require-builtin/lib/index.js` | 换成**纯 JS 实现**（`createRequire` + `requireBuiltin`/`isAllowedInternalId`/`getBindingInfo`），替代预编译 addon；配合 `--expose-internals` | **必需**（不换起不来：host preparation 阶段直接失败） |
-| 2 | `@deepseek-ai/node-addon-system/lib/flock.js` | 平台白名单加 `openharmony`，固定用 `musl` 子目录 | **必需**（headless 硬前置；`web` 走到加锁路径同样需要） |
+| 2 | `@deepseek-ai/node-addon-system/lib/flock.js` | 在**官方原版**上加一段：`platform === 'openharmony'` 时 `tryLock` **直接桩成立即成功**（只保留进程内写声明，放弃跨进程排他）。理由：鸿蒙上 `flock(2)` 与 hmdfs 的锁在这套内核/沙箱模型下都不可靠 —— 上游 browser worker 也是这么桩掉这个入口的，取舍一致 | **必需**（headless 硬前置；`web` 走到加锁路径同样需要） |
 | 3 | `@deepseek-ai/dsh-attachment-local/lib/index.js` | ① **fsync 边界** —— `ensureDurableHome()` 从 `DSH_HOME` 逐级 fsync 到 `/`，沙箱里 `/data/storage/el2`（及 `/data/storage`、`/data`）不可读 → `EACCES`，整次附件准入失败；改成遇到 `EACCES`/`EPERM` 就当持久边界。② **无 sharp 时的图片后端** —— `sharp` 在 openharmony-arm64 上没有任何平台二进制，`require` 直接抛错；补两层（头部嗅探 + 精简 Jimp）：PNG/JPEG 真解码校验、EXIF 定向、按预算缩放重编码，WebP/GIF 走头解析原样透传；Jimp 只当**增强不当闸门** | **必需**（不补：附件存不下来、图片全废） |
 | 4 | `@deepseek-ai/dsh-api-session-controller/lib/index.js` | **别吞真因**：`prompt()` 的兜底 catch 把非 `RemoteError`/`AttachmentError` 都转成 `session/agent-busy, "prompt rejected"`，真因只塞进 `details.reason`（前端不显示）。改成 `console.error` 记日志并把原文带进消息：`prompt rejected (cause: …)` | **必需**（否则准入类故障没法定位） |
 | 5 | `@deepseek-ai/dsh-client-ui-conversation/lib/client.js` | **图片类型判定只信浏览器**：`isImageMediaType()`/`imageMediaType()` 只认四个精确串，而 ArkWeb 给的 `file.type` 可能是空/`application/octet-stream`/旧别名（`image/jpg`、`image/x-png`）。补：① 别名归一；② 声明不可信时按**文件头魔数**识别 | **必需**（容器适配） |
@@ -77,7 +77,7 @@
 | 资产 | 内容 | 去向 |
 |---|---|---|
 | `image-backend/` | jimp 闭包 **270 个文件 / 约 2 MB**（`@jimp/core`、`js-png`、`js-jpeg`、`plugin-resize/rotate/flip` + 依赖闭包；与官方 npm 包逐字节一致，只裁掉 `*.d.ts`/`*.map`） | `node_modules/@deepseek-ai/dsh-attachment-local/node_modules/` |
-| `native/` | OHOS 平台包 **5 个文件**：`@deepseek-ai/node-addon-system-openharmony-arm64@0.1.2`（flock 原生加载器）、`@vscode/ripgrep-openharmony-arm64@1.18.0`（**rg shim**，纯 JS，按 dsh 实际 argv 实现 `--files`/`--json --regexp` 两种调用）—— **公共 registry 上 404** | `node_modules/` |
+| `native/` | OHOS 平台包 **2 个文件**：只剩 `@vscode/ripgrep-openharmony-arm64@1.18.0`（**rg shim**，纯 JS，按 dsh 实际 argv 实现 `--files`/`--json --regexp` 两种调用）—— **公共 registry 上 404**。<br>原先还有自造的 `@deepseek-ai/node-addon-system-openharmony-arm64@0.1.2`（flock 原生加载器），2026-09-30 随 flock 改成打桩**一并删除**（省掉交叉编译 + 签名 + 跟版本维护） | `node_modules/` |
 | `bin/` | 壳要用的顶层 `bin/bash`（28 字节 shim：`exec /bin/sh "$@"`）—— 官方 npm 包**没有**顶层 `bin/` | 包顶层 `bin/` |
 | `pty-backend/` | 为鸿蒙交叉编译的 `node-pty` 原生模块（自带 prebuilds 只有 darwin/linux/win32） | `node_modules/node-pty/prebuilds` |
 
@@ -99,7 +99,7 @@
 | 契约 | 为什么要查 | 本次实测 |
 |---|---|---|
 | `dsh-tool-fs-search` 调 rg 的 argv | `native/` 里的 rg 是 **shim**，只覆盖 dsh 实际用到的两种调用；argv 变了 shim 就废 → grep/glob 工具报 `ripgrep launch failed` | `dsh-tool-fs-search/lib/index.js` 与 0.1.7 **逐字节相同** → argv 未变，shim 直接可用 |
-| `node-addon-system` 的入口契约（平台白名单 + 平台包加载路径） | 自造平台包 `...-openharmony-arm64@0.1.2` 要跟得上加载器的解析方式 | 官方 `flock.js` 内容未变；**真加锁实测通过**（`tryLockExclusive(fd)`，懒加载 → 必须真调用才算验证） |
+| `node-addon-system` 的入口契约 | 我们改的 `flock.js` 要跟得上上游 `loadBinding()` 的结构（打桩分支插在哪、`tryLock` 的签名） | 官方 `flock.js` 内容与 0.1.7 相同；**打桩实测通过**：`process.platform='openharmony'` 时 `tryLockExclusive(fd)` **立即 resolve（0 ms）**（懒加载 → 必须真调用才算验证）。自造平台包已不再需要 |
 | `node-addon-require-builtin` 的 API 表面 | 我们的纯 JS 垫片要实现官方 addon 被用到的方法 | 官方内容未变；实测 `requireBuiltin('internal/modules/esm/loader')` 拿到 loader、`getBindingInfo()` 返回 `js-shim` |
 
 > 0.2.0 新增的依赖（`got`/`http2-wrapper` 等纯 JS 包 + 5 个 `@deepseek-ai/*` 包、移除 `@aws-crypto`）
@@ -107,8 +107,11 @@
 
 ### 2.5 上游「同名同版本重发」的 7 项仍在
 
-第 1、2、6、8、9、10、11 项在 `manifest.json` 里额外带
+第 1、6、8、9、10、11 项在 `manifest.json` 里额外带
 `reason: 上游同名同版本重发后内容变了，用现役可跑的那份`。
+
+> 第 2 项（`flock.js`）2026-09-30 改成"打桩"后，它的 `reason` 已换成打桩说明 ——
+> 它仍然是**我们的改动**，但不属于"同名同版本重发"这一类了。
 它们**同时也是我们的改造**（见 2.2），不能因为"上游已发布"就丢掉；
 但也不能当"永远正确"照抄 —— **每次升级都要重新核对**，上游修好后就该去掉。
 本次核对结论：这 7 项在新版的官方内容与 0.1.7 时相同，我们的版本仍适用。
@@ -142,7 +145,7 @@ node scripts/build-dsh.mjs 0.2.0-rc.2 --clean          # 清中间产物（work/
 | 起临时实例（32101 + 干净 `DSH_HOME` + 独立包目录） | ✅ 进程存活，日志出现 `dsh web: http://127.0.0.1:32101/?token=…` |
 | HTTP | ✅ 无 token **401** / 带 token **303**（发 cookie）/ 带 cookie **200**（34 KB 页面） |
 | 最小任务 | ✅ `--profile headless "1+1 等于几？只回答数字"` → `2`（LLM + 会话 + 工具装载全通） |
-| 能力抽查 | ✅ `require-builtin` 垫片拿到 `internal/modules/esm/loader`；`flock` **真加锁**成功；rg shim（`--json --regexp` / `--files`）正常；jimp 闭包（core/js-png/js-jpeg/plugin-resize）可解析；`node-pty` 可加载 |
+| 能力抽查 | ✅ `require-builtin` 垫片拿到 `internal/modules/esm/loader`；rg shim（`--json --regexp` / `--files`）正常；jimp 闭包（core/js-png/js-jpeg/plugin-resize）可解析；`node-pty` 可加载。<br>（`flock` 原为「真加锁」，2026-09-30 起改为**打桩**：`tryLockExclusive(fd)` 在 `openharmony` 上立即 resolve，实测 0 ms） |
 | `write` 工具写**共享盘**新文件 | ✅ 落地成功（无 `EPERM … link`） |
 | 硬错误扫描 | ✅ 无 `plugin tree failed to load` / `Cannot find module` / `[execve 失败]` / `Error loading shared library` |
 | 产物自检 | ✅ 65.1 MiB、25229 条目、13 个替换文件与图片后端 sha256 全中 |
@@ -168,6 +171,11 @@ node scripts/build-dsh.mjs 0.2.0-rc.2 --clean          # 清中间产物（work/
 
 - **本次（0.2.0-rc.2）**：13 项里 11 项官方未变直接复用，2 项按新版重放；4 类资产零改动
   （原生依赖版本全未变）；三处契约（rg argv / flock loader / require-builtin API）复查通过，无新增改造点。
+- **0.2.0-rc.2 追加（2026-09-30 晚）**：`flock` 从「真加锁 + 自造平台包」**简化为打桩** ——
+  参照 harmonybrew 的 dsh bottle（官方 npm 包 + 同一段打桩）。删掉 `native/` 里的
+  `@deepseek-ai/node-addon-system-openharmony-arm64@0.1.2`（平台包 5 文件 → 2 文件，
+  产物条目 25232 → 25229），省掉交叉编译 + 签名 + 跟版本维护；代价是放弃**跨进程**排他
+  （同进程内第二个 writer 仍被拒，壳是单进程场景，用不到）。
 - **0.1.7-rc.2**：必需补丁收敛到「`node-addon-require-builtin` 纯 JS 垫片 + `--expose-internals`」即可零禁用启动；
   flock 放行 + 自造平台包；目录选择器根限制；文档预览绕过。
 - **更早**：从「补丁重放」改为「整文件替换」（只留 `files/` 整文件 + 每版独立脚本）。
