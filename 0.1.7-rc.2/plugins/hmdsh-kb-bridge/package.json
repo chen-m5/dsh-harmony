@@ -1,0 +1,12 @@
+{
+  "name": "hmdsh-kb-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "HMDSH 壳侧知识库桥：页面把「壳本地检索」的结果经 RPC 回传给 host",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  }
+}
