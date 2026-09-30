@@ -4,7 +4,7 @@
 //   node scripts/trim-jimp.mjs --in <npm 装好的 node_modules> --out <输出 node_modules>
 //
 // 做的事：
-//   1. 从 seeds（见 <版本>/patches/jimp-deps.json（如 0.1.7-rc.2/patches/jimp-deps.json））出发，按 package.json 的 dependencies 递归收集闭包
+//   1. 从 seeds（见 <版本>/patches/jimp-deps.json（如 0.2.0-rc.2/patches/jimp-deps.json））出发，按 package.json 的 dependencies 递归收集闭包
 //   2. 只复制这些包（扁平布局，与 npm 装出来的一致）
 //   3. 去杂物：dist/esm（保留 dist/commonjs）、src、test*、example*、*.d.ts/*.map/*.md 等
 //   4. zod 只留 v3/（它的 index.cjs 转发到 v3；v4/v4-mini/src 用不到）

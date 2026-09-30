@@ -90,7 +90,7 @@ for (const [label, p] of checks) {
   console.log(`  ${ok ? '✓' : '✗'} ${label}`)
   if (!ok) bad++
 }
-// VERSION 是 0.2.0 起才有的约定，**可选**：老包（如 0.1.7-rc.2）没有它，
+// VERSION 是 0.2.0 起才有的约定，**可选**：更早的包没有它，
 // 壳只会把版本显示成「未知版本」，不影响外挂 —— 所以这项不参与失败判定
 const ver = join(dir, 'VERSION')
 const hasVer = existsSync(ver)

@@ -49,7 +49,7 @@ scripts/                    顶层：**共用件**
   build-dsh.mjs             薄转发入口 → <版本>/scripts/build-dsh.mjs
   verify-dsh.mjs            薄转发入口 → <版本>/scripts/verify-dsh.mjs
   trim-jimp.mjs             通用工具：裁剪 jimp 依赖闭包
-<版本>/                     **每个 dsh 版本一套，互不影响**（如 0.1.7-rc.2/）
+<版本>/                     **每个 dsh 版本一套，互不影响**（当前 0.2.0-rc.2/）
   scripts/                  ★ 这一版**独立**的脚本（权威实现；下个版本可能不一样）
   patches/                  ★ 这一版**独立**的补丁留档（+ jimp-deps.json）
   manifest.json             上游版本 + 替换/资产清单 + sha256 校验基线
