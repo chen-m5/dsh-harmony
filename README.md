@@ -36,10 +36,8 @@ export PATH=/storage/Users/currentUser/.harmonybrew/bin:$PATH
 完整说明（权限前提、拿包、常见问题、实测记录）见
 **[docs/在鸿蒙上跑-dsh.md](docs/在鸿蒙上跑-dsh.md)**。
 
-> 工作区（目录选择器根）是**可配置**的，两个环境变量：
-> `DSH_PICKER_ROOT`（初始目录，缺省设备文档目录）、
-> `DSH_PICKER_ALLOW_OUTSIDE`（是否允许离开初始目录，缺省不允许）。
-> 详见 [docs/在鸿蒙上跑-dsh.md](docs/在鸿蒙上跑-dsh.md) 第六节末尾。
+> 目录选择器（「创建工作区」）**跟随上游行为，本仓库不做限制**；
+> 若被收窄在某个目录里，那是宿主应用加的限制。
 
 ## 目录
 

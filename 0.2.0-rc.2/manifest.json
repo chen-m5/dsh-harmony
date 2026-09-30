@@ -61,12 +61,6 @@
       "reason": "上游同名同版本重发后内容变了，用现役可跑的那份（node-addon-require-builtin 新版会让 dsh 起不来）"
     },
     {
-      "path": "node_modules/@deepseek-ai/dsh-host-directory-picker-browse/lib/index.js",
-      "sha256": "00f697cc28a14dd7723a005734bb91d9699530d3f493781a1c23bb782adfb1cd",
-      "upstreamSha256": "20d82ef343a4ee06f1ace8d56521b3e6c7cbbf52816acf056e9977839d31c54b",
-      "reason": "上游同名同版本重发后内容变了，用现役可跑的那份（node-addon-require-builtin 新版会让 dsh 起不来）"
-    },
-    {
       "path": "node_modules/@deepseek-ai/node-addon-system/lib/flock.js",
       "sha256": "ac383b80f325546e6d3233e8f1d22ed84f7d3b3eeff8091ebbb33096f9cd3d4d",
       "upstreamSha256": "e42af00c298d56322c073bf7cc66485096028318ab645a2e69dc2aa7481ba646",

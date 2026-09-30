@@ -162,7 +162,7 @@ node scripts/build-dsh.mjs 0.2.0-rc.2 --out /storage/Users/currentUser/Documents
 ```
 
 脚本会用 pnpm 拉官方 `@deepseek-ai/dsh` 再做替换/补资产（首次 1–2 分钟），
-跑完会打印产物大小并**自检**（14 个替换文件、rg shim、图片后端、`bin/dsh`）。
+跑完会打印产物大小并**自检**（13 个替换文件、rg shim、图片后端、`bin/dsh`）。
 
 ### C. 用别人给的 zip（或自己备份的）
 
@@ -236,28 +236,14 @@ if (!('dshDesktop' in globalThis)) return
 
 （若宿主注入了 `dshDesktop` 垫片，账号 UI 就会出现 —— 那是宿主侧集成的做法。）
 
-### 工作区（目录选择器根）—— 两个配置项
+### 工作区（目录选择器）
 
-dsh 的「创建工作区」是让人挑目录的。**不加限制时能一路选到沙箱内部那种用户看不见的路径**，
-所以这个适配层给它加了两项**可配置**的限制：
+dsh 的「创建工作区」由它自己的目录选择器负责，**本仓库不做任何限制** —— 选哪个目录都行，
+跟随上游行为。
 
-| 配置（环境变量）| 作用 | 缺省 |
-|---|---|---|
-| `DSH_PICKER_ROOT` | **初始目录**（选择器从哪儿开始）| `/storage/Users/currentUser/Documents` |
-| `DSH_PICKER_ALLOW_OUTSIDE` | **是否允许离开初始目录**（`1` / `true` / `yes` / `on` 放开）| 不设 = 不允许（锁在初始目录内，越界钳回）|
-
-两个都不设时的行为 = 只能浏览 / 在初始目录之下创建目录（这个缺省是给"应用内托管"场景准备的）。
-想要完整文件系统访问，把第二个放开就行：
-
-```sh
-export DSH_PICKER_ROOT=/storage/Users/currentUser/Documents/myproject   # 换个初始目录
-export DSH_PICKER_ALLOW_OUTSIDE=1                                       # 允许离开它
-```
-
-实现见 `files/node_modules/@deepseek-ai/dsh-host-directory-picker-browse/lib/index.js`
-里的 `PICKER_ROOT` / `ALLOW_OUTSIDE` 两个常量与 `inPickerRoot()`。
-想改的是**缺省值**（而不是每次设环境变量），改那个补丁文件后重新打包即可：
-`node scripts/build-dsh.mjs <版本> --refresh-sha`。
+> 如果目录选择器被收窄在某个目录里、跳不出去，那是**宿主应用**加的限制
+> （例如把 dsh 托管在应用内时，为避免用户选到沙箱内部那些看不见的路径而做的收窄），
+> 不在本仓库范围内。
 
 ---
 

@@ -14,7 +14,7 @@
 | 项 | 值 |
 |---|---|
 | 上游 | `@deepseek-ai/dsh` **0.2.0-rc.2**（MIT） |
-| 改造形态 | **14 个文件整文件替换** + 4 类随包资产（不是 patch 重放） |
+| 改造形态 | **13 个文件整文件替换** + 4 类随包资产（不是 patch 重放） |
 | 本仓库不含 | dsh 源码、dsh 包体 —— 打包时用 pnpm 拉官方包，再按本清单替换/新增 |
 | 上次更新 | 2026-09-30（从 0.1.7-rc.2 升上来，含真机验收） |
 
@@ -47,7 +47,7 @@
 > `linux-x64/arm64`（glibc+musl）与 `darwin-x64/arm64`；全仓库 grep `openharmony` = **0 处**。
 > 所以「纯 JS 垫片 + 平台白名单 + 自造平台包」这三条**一个都不能少**。
 
-### 2.2 替换的 14 个文件（= `files/`，保留包内相对路径）
+### 2.2 替换的 13 个文件（= `files/`，保留包内相对路径）
 
 `manifest.json` 的 `replace[]` 逐项记着**官方原文件 sha256**（`upstreamSha256`）与**我们这份 sha256**；
 `build-dsh.mjs` 每次打包前校验「官方树确实是官方原样」，不符就**报错停下**。
@@ -62,15 +62,14 @@
 | 6 | `@deepseek-ai/dsh-client-connection/lib/client.js` | **loopback 页面不跟随浏览器联网状态**：`stopNetworkWatch: handle.isLoopback ? () => {} : watchBrowserNetwork(controller)`。ArkWeb 的 `navigator.onLine`/`offline` 不可靠，一旦报离线，重连循环 `emitState("disconnected")` 后**无限期停住** —— 而页面本身就是 `127.0.0.1` 的本机服务 | **必需**（容器适配；不补要用户手点重连） |
 | 7 | `@deepseek-ai/dsh-client-ui-settings-account/lib/client.js` | ① **登录授权链接交给宿主壳** —— 钩在插件的**状态流循环**里（`for await (const frame of stream)`），拿到新 `authorizeUrl` 就调 `globalThis.dshShell.openLogin(url)`；放在 `startSignIn` 返回之后**无效**（那时 URL 还没到）。② **余额条** —— 账号启动器上方显示「充值余额 / 赠金余额」+ ↻ 刷新（挂载时拉一次、刷新有转圈反馈、赠金为 0 也显示、颜色走主题变量） | 体验 |
 | 8 | `@deepseek-ai/dsh-fs-local/lib/index.js` | no-clobber 发布用 `link(2)`，**共享盘（hmdfs）不支持硬链接** → `write` 工具报 `EPERM … link`。命中 `EPERM`/`EOPNOTSUPP`/`ENOSYS`/`EXDEV` 时降级 `rename`；目标已存在仍按原语义报错 | **能力**（不补则 `write` 写不进共享盘） |
-| 9 | `@deepseek-ai/dsh-host-directory-picker-browse/lib/index.js` | 目录选择器**根限制**：起点/边界钳在指定根下；`DSH_PICKER_ROOT` 可改根（鸿蒙上 directory-picker 一定走 `browse` 后端，上游可浏览整个文件系统） | 产品定制 |
-| 10 | `@deepseek-ai/dsh-client-ui-directory-picker-browse/lib/client.js` | 摘除面包屑行尾的「编辑路径」铅笔按钮（路径只能逐级点选） | 产品定制 |
-| 11 | `@deepseek-ai/dsh-client-ui-sidebar-documentpreview/lib/client.js` | 预览不再被 `meta.status="none"` 拦（`canRead=true`）、加载态加刷新按钮 | 产品定制（代价：缺 `version`/`absolutePath`，外部改动不再自动重载，用刷新按钮） |
-| 12 | `@deepseek-ai/dsh-subprocess-local/lib/runner-launch-B2zsQ1Dz.js` | `process.platform` 在 OpenHarmony 上是 `"openharmony"`，而终端 inspector 只认 linux/darwin/win32 → 原来直接抛「terminal inspection is unsupported on platform openharmony」。改成**把 openharmony 与 linux 同等对待**（读 `/proc` 的 LinuxProcessInspector 在鸿蒙可用） | **能力**（不补侧栏终端报错） |
-| 13 | `@deepseek-ai/dsh-client-ui-sidebar-terminal/lib/client.terminal.js` | 终端复制/粘贴改用鼠标与 Ctrl+V：选中后**单击右键=复制**、双击右键=粘贴、Ctrl+V=粘贴（走 Web 剪贴板，不占系统权限）；Ctrl+C 保持 SIGINT 不拦；底部显示操作提示 | 体验 |
-| 14 | `@deepseek-ai/dsh-credentials-local/lib/index.js` | **owner-only 检查豁免 `openharmony`**：鸿蒙共享盘（hmdfs）挂载固定 660，`chmod 600` 不生效 → 原检查必然失败 → `credentials` 插件不激活 → **启动直接失败**。照上游给 `win32` 的豁免，同样豁免 `openharmony`（凭据文件仍只对 `file_manager` 组的应用可见）| **必需**（DSH_HOME 落在共享盘时）|
+| 9 | `@deepseek-ai/dsh-client-ui-directory-picker-browse/lib/client.js` | 摘除面包屑行尾的「编辑路径」铅笔按钮（路径只能逐级点选） | 产品定制 |
+| 10 | `@deepseek-ai/dsh-client-ui-sidebar-documentpreview/lib/client.js` | 预览不再被 `meta.status="none"` 拦（`canRead=true`）、加载态加刷新按钮 | 产品定制（代价：缺 `version`/`absolutePath`，外部改动不再自动重载，用刷新按钮） |
+| 11 | `@deepseek-ai/dsh-subprocess-local/lib/runner-launch-B2zsQ1Dz.js` | `process.platform` 在 OpenHarmony 上是 `"openharmony"`，而终端 inspector 只认 linux/darwin/win32 → 原来直接抛「terminal inspection is unsupported on platform openharmony」。改成**把 openharmony 与 linux 同等对待**（读 `/proc` 的 LinuxProcessInspector 在鸿蒙可用） | **能力**（不补侧栏终端报错） |
+| 12 | `@deepseek-ai/dsh-client-ui-sidebar-terminal/lib/client.terminal.js` | 终端复制/粘贴改用鼠标与 Ctrl+V：选中后**单击右键=复制**、双击右键=粘贴、Ctrl+V=粘贴（走 Web 剪贴板，不占系统权限）；Ctrl+C 保持 SIGINT 不拦；底部显示操作提示 | 体验 |
+| 13 | `@deepseek-ai/dsh-credentials-local/lib/index.js` | **owner-only 检查豁免 `openharmony`**：鸿蒙共享盘（hmdfs）挂载固定 660，`chmod 600` 不生效 → 原检查必然失败 → `credentials` 插件不激活 → **启动直接失败**。照上游给 `win32` 的豁免，同样豁免 `openharmony`（凭据文件仍只对 `file_manager` 组的应用可见）| **必需**（DSH_HOME 落在共享盘时）|
 
-> 这 14 个都是**我们的改动**（不是官方内容）—— 升级时可用改动特征自查：
-> `flock.js` 里的 `'openharmony'`、`DSH_PICKER_ROOT`、`dshShell.openLogin`、`js-shim`、
+> 这 13 个都是**我们的改动**（不是官方内容）—— 升级时可用改动特征自查：
+> `flock.js` 里的 `'openharmony'`、`dshShell.openLogin`、`js-shim`、
 > `@jimp/core` 的懒加载在**官方原文件里都应该是 0 处**。
 
 ### 2.3 随包资产（官方树里没有，必须随版本目录自带）——本次全部原样复用
@@ -149,7 +148,7 @@ node scripts/build-dsh.mjs 0.2.0-rc.2 --clean          # 清中间产物（work/
 | 能力抽查 | ✅ `require-builtin` 垫片拿到 `internal/modules/esm/loader`；rg shim（`--json --regexp` / `--files`）正常；jimp 闭包（core/js-png/js-jpeg/plugin-resize）可解析；`node-pty` 可加载。<br>（`flock` 原为「真加锁」，2026-09-30 起改为**打桩**：`tryLockExclusive(fd)` 在 `openharmony` 上立即 resolve，实测 0 ms） |
 | `write` 工具写**共享盘**新文件 | ✅ 落地成功（无 `EPERM … link`） |
 | 硬错误扫描 | ✅ 无 `plugin tree failed to load` / `Cannot find module` / `[execve 失败]` / `Error loading shared library` |
-| 产物自检 | ✅ 65.1 MiB、25229 条目、14 个替换文件与图片后端 sha256 全中 |
+| 产物自检 | ✅ 65.1 MiB、25229 条目、13 个替换文件与图片后端 sha256 全中 |
 
 对照：`0.1.7-rc.2` ✅ 起得来；`0.1.5-rc.3` ❌ `plugin tree failed to load`（原生模块缺失被硬判死）。
 
@@ -175,6 +174,11 @@ node scripts/build-dsh.mjs 0.2.0-rc.2 --clean          # 清中间产物（work/
 - `koffi` 本次由 3.3.2 **降到 3.1.1**（上游依赖树变动）：它已改懒加载、非 Windows 路径不触碰，实测无影响。
 
 ## 七、变更沿革
+
+- **0.2.0-rc.2 追加三（2026-09-30）**：把「目录选择器根限制」**从本仓库移到壳**（原第 9 项删除，改造数 14 → 13）。
+  理由：那条限制的动机只来自"被应用托管" —— 避免用户一路选到沙箱内部那些看不见的路径；
+  开源出去的包不需要它。现在**壳在打包时**用 `scripts/apply-dsh-patches.sh` 把补丁注入内置 zip
+  （见壳仓库 `scripts/dsh-patches/`），本仓库的包跟随上游行为。
 
 - **0.2.0-rc.2 追加二（2026-09-30）**：新增**第 14 项**改造 —— `credentials-local` 的 owner-only
   检查豁免 `openharmony`（共享盘固定 660、`chmod 600` 不生效，原来会直接卡住启动）。
