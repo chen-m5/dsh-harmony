@@ -16,8 +16,13 @@ zsh -c "$(curl -fsSL https://harmonybrew.atomgit.com/install.sh)"
 eval "$(/storage/Users/currentUser/.harmonybrew/bin/brew shellenv)"
 brew install node
 
-# 2) 拿本仓库的鸿蒙包（自己构建；已有 zip 的话直接解压到 Documents/dsh/ 即可）
+# 2) 拿本仓库的鸿蒙包（已有 zip 的话直接解压到 Documents/dsh/ 即可）
+#    构建工具要单独装：brew install node 不带它们
+brew install pnpm zip unzip
+#    取仓库二选一（选 b 的话连 git 都不用装）：
+#      a) 命令行克隆（需要 git：brew install git）
 git clone https://gitcode.com/chen-qiongmeng/dsh-harmony.git && cd dsh-harmony
+#      b) 打开仓库页面点「克隆/下载」下载 zip，解开后进那个目录
 node scripts/build-dsh.mjs 0.2.0-rc.2 --out /storage/Users/currentUser/Documents/dsh/dsh-ohos-0.2.0-rc.2.zip
 
 # 3) 起服务，把打印出来的 URL（带 token）粘进系统浏览器
@@ -57,10 +62,14 @@ scripts/                    顶层：**共用件**
 ## 用法
 
 ```sh
-node scripts/fetch-dsh.mjs 0.2.0-rc.2      # 拉官方包到 work/0.2.0-rc.2/
-node scripts/build-dsh.mjs 0.2.0-rc.2      # 出 dsh-ohos.zip（顶层目录 dsh-ohos-0.2.0-rc.2/）
+node scripts/fetch-dsh.mjs 0.2.0-rc.2      # 拉官方包到 work/0.2.0-rc.2/（需要 pnpm）
+node scripts/build-dsh.mjs 0.2.0-rc.2      # 出 dsh-ohos.zip（需要 zip；顶层目录 dsh-ohos-0.2.0-rc.2/）
 node scripts/verify-dsh.mjs dsh-ohos.zip
 ```
+
+> **前置**：`node`（≥ 20.12）、**`pnpm`**（用它拉官方包）、`zip`（打包）、`unzip`（stage 解压）。
+> 光装 node 是**不够**的 —— 这些在 harmonybrew 里都是单独的包：`brew install pnpm zip unzip`
+> （`git` 只在 clone 仓库时才需要）。`pnpm` 也可以用 `npm i -g pnpm` 装。
 
 ## 许可与免责
 

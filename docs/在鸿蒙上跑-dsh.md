@@ -23,7 +23,12 @@ eval "$(/storage/Users/currentUser/.harmonybrew/bin/brew shellenv)"
 brew install node && node -v
 
 # 2) 拿包：自己构建（已有 zip 的话，解压到 Documents/dsh/ 即可）
+#    构建工具要单独装（见第四节）：brew install node 不带它们
+brew install pnpm zip unzip
+#    取仓库二选一（选 b 连 git 都不用装）：
+#      a) 命令行克隆（需要 git：brew install git）
 git clone https://gitcode.com/chen-qiongmeng/dsh-harmony.git && cd dsh-harmony
+#      b) 打开仓库页面点「克隆/下载」下 zip，解开后进那个目录
 node scripts/build-dsh.mjs 0.2.0-rc.2 --out /storage/Users/currentUser/Documents/dsh/dsh-ohos-0.2.0-rc.2.zip
 
 # 3) 起服务（前台跑着），把打印出来的 URL **连 token 一起**粘进系统浏览器
@@ -47,6 +52,7 @@ export PATH=/storage/Users/currentUser/.harmonybrew/bin:$PATH
 | 系统版本 | HarmonyOS ≥ **6.1.0.117(SP68)**，或 OpenHarmony 6.1 | `param get const.product.software.version` |
 | 终端能访问用户目录 | 能读 `/storage/Users/currentUser/.harmonybrew` | `ls /storage/Users/currentUser/.harmonybrew` |
 | Node | **≥ 20.12**（dsh 的工具链目标是 Node 22 LTS） | `node -v` |
+| 构建工具（只有"自己构建"才需要）| `pnpm`、`zip`、`unzip`（`git` 仅"命令行克隆仓库"时才要）—— **`brew install node` 不带这些** | `pnpm -v; zip -v` |
 
 ### ⚠ 最容易卡住的一步：权限前提
 
@@ -114,8 +120,36 @@ export PATH=/storage/Users/currentUser/.harmonybrew/opt/node@22/bin:$PATH
 
 ### A. 自己构建（可复现，推荐）
 
+**除了 node，构建还要几个命令行工具**（`brew install node` 只给 node + npm/npx）：
+
+| 命令 | 谁在用 | 不给会怎样 |
+|---|---|---|
+| **`pnpm`** | `fetch-dsh.mjs` 用它拉官方 `@deepseek-ai/dsh` | `pnpm: command not found`，构建直接失败 |
+| `zip` / `unzip` | `build-dsh.mjs` 打产物 zip；`stage.mjs` 解压校验 | 打不出包 / 解不开 |
+| `git` | **只有你想用命令行克隆仓库时才需要**（见下）| `git: command not found` |
+
 ```sh
+brew install pnpm zip unzip
+```
+
+> `pnpm` 也可以用 npm 装（`npm i -g pnpm`）—— 但既然都用 harmonybrew 了，`brew install pnpm` 更一致。
+> 另外 `fetch-dsh.mjs` 留了逃生口：`PNPM_CMD="node /path/to/pnpm.cjs" node scripts/build-dsh.mjs …`。
+
+**取仓库二选一：**
+
+```sh
+# a) 命令行克隆 —— 需要 git
+brew install git
 git clone https://gitcode.com/chen-qiongmeng/dsh-harmony.git
+cd dsh-harmony
+```
+
+**b) 下载（推荐，连 git 都不用装）**：打开 <https://gitcode.com/chen-qiongmeng/dsh-harmony>
+页面点「克隆/下载」拿 zip，解开后 `cd` 进去即可。
+
+然后构建：
+
+```sh
 cd dsh-harmony
 node scripts/build-dsh.mjs 0.2.0-rc.2 --out /storage/Users/currentUser/Documents/dsh/dsh-ohos-0.2.0-rc.2.zip
 ```
@@ -211,6 +245,9 @@ if (!('dshDesktop' in globalThis)) return
 | `ls: …/.harmonybrew: Operation not permitted` | 当前环境不在 `file_manager` 组（典型：应用沙箱内）。换到有该组的环境执行 |
 | `SyntaxError: util.parseEnv` | Node 太老（< 20.12）。`node -v` 确认，必要时 `brew install node` |
 | `dsh: 找不到 node。装一个…` | PATH 里没有 node：先 `eval "$(brew shellenv)"`，或把 node 加到 PATH |
+| 构建时 `pnpm: command not found` | **`brew install node` 只带 node/npm，不带 pnpm** → `brew install pnpm`（或 `npm i -g pnpm`）|
+| `zip: command not found` / 解压失败 | 同上：`brew install zip unzip` |
+| `git: command not found` | 只有用命令行克隆时才需要：`brew install git`。**不想装 git 就在仓库页面点「克隆/下载」拿 zip 解开** |
 | `Error loading shared library libXXX.so` | 拿错了包 —— 那是 harmonybrew 装在**非默认前缀**下的 bottle 才会有的问题；本流程用的 dsh 包自带依赖，不该出现 |
 | 网页打开报 401 | URL 少了 `?token=…`。token 每次启动都变，要重新复制 |
 | 端口被占 | 换 `--port`（HMDSH 占 32100）|
