@@ -229,6 +229,26 @@ if (!('dshDesktop' in globalThis)) return
 
 （若宿主注入了 `dshDesktop` 垫片，账号 UI 就会出现 —— 那是宿主侧集成的做法。）
 
+### 备注：工作区（目录选择器根）默认写死为「文档目录」
+
+本仓库的适配补丁把 dsh 的**目录选择器根 / "创建工作区"**限制在
+`/storage/Users/currentUser/Documents`，见：
+
+```
+0.2.0-rc.2/files/node_modules/@deepseek-ai/dsh-host-directory-picker-browse/lib/index.js
+    const PICKER_ROOT = … return "/storage/Users/currentUser/Documents";
+```
+
+这样做的原因：dsh 的"创建工作区"会让人挑目录，不加限制时能一路选到沙箱内部
+那种用户看不见的路径。
+
+**要改的话，自行处理（两种）：**
+
+- **临时换**：该补丁认 `DSH_PICKER_ROOT` 环境变量 ——
+  `export DSH_PICKER_ROOT=/storage/Users/currentUser/Documents/xxx`；
+- **永久改**：直接改上面那个补丁文件里的默认值，再重新 `node scripts/build-dsh.mjs <版本>` 打包
+  （改完记得同步 `manifest.json` 的 sha256：加 `--refresh-sha`）。
+
 ---
 
 ## 七、常见问题

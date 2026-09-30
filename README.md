@@ -36,6 +36,10 @@ export PATH=/storage/Users/currentUser/.harmonybrew/bin:$PATH
 完整说明（权限前提、拿包、常见问题、实测记录）见
 **[docs/在鸿蒙上跑-dsh.md](docs/在鸿蒙上跑-dsh.md)**。
 
+> 备注：**工作区（目录选择器根）默认写死为「设备文档目录」** —— 见适配补丁
+> `files/node_modules/@deepseek-ai/dsh-host-directory-picker-browse/lib/index.js` 里的 `PICKER_ROOT`。
+> 想换路径：临时 `export DSH_PICKER_ROOT=…`；永久则改那个补丁文件后重新打包。
+
 ## 目录
 
 ```
