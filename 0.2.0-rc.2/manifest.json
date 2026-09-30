@@ -32,7 +32,7 @@
     },
     {
       "path": "node_modules/@deepseek-ai/dsh-attachment-local/lib/index.js",
-      "sha256": "df26e1fb7cbaf8f6bfde2a0207a75fc401f53a9a4cff205ffd4b5f8e5a2f69f8",
+      "sha256": "bd32fd68505c4f4acb307cc45b13b23440521a1358d862b361a5685fb5ef58d5",
       "upstreamSha256": "cd39685581b4573a453c6126f8ce73da0bf1257c378827ebb431d6d4064f7662",
       "bytes": 63549
     },
