@@ -13,7 +13,7 @@
 
 用法不变：
 ```sh
-node scripts/fetch-dsh.mjs 0.1.7-rc.2
-node scripts/build-dsh.mjs 0.1.7-rc.2 [--out <zip>]
-node scripts/verify-dsh.mjs <zip> 0.1.7-rc.2
+node scripts/fetch-dsh.mjs 0.2.0-rc.2
+node scripts/build-dsh.mjs 0.2.0-rc.2 [--out <zip>]
+node scripts/verify-dsh.mjs <zip> 0.2.0-rc.2
 ```
