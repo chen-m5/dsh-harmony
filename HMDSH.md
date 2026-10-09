@@ -34,10 +34,15 @@
 **安装**（在设备/沙箱里执行，一条命令）：
 
 ```sh
-REPO=<本仓库在设备上的路径>          # 例如 /storage/Users/currentUser/Documents/git/ohos/dsh-harmony
-mkdir -p "$DSH_HOME/skills"
-cp -r "$REPO"/skills/dsh-shell "$REPO"/skills/harmonybrew "$REPO"/skills/dsh-plugin-install "$DSH_HOME/skills/"
+REPO=/storage/Users/currentUser/Documents/git/ohos/dsh-harmony   # 本仓库在设备上的路径
+SK=/data/storage/el2/base/haps/entry/files/dsh-home/skills       # 用户目录（= dsh 里的 $DSH_HOME/skills）
+mkdir -p "$SK"
+cp -r "$REPO"/skills/dsh-shell "$REPO"/skills/harmonybrew "$REPO"/skills/dsh-plugin-install "$SK/"
 ```
+
+> 在 dsh 自己的 `bash` 工具里，`$DSH_HOME` 就是上面那个 `.../files/dsh-home`，可以直接用；
+> 在设备终端里手敲时请用绝对路径 —— `$DSH_HOME` 只在 dsh 起的进程里有，空展开会写到 `/skills`。
+> `harmonybrew` 的安装脚本随 skill 一起放（`$SK/harmonybrew/install-harmonybrew.mjs`），别漏。
 
 放进去就生效（rank 400 是实时扫描的），**不必重启 dsh，更不必重新打 hap**。
 验证：看 dsh 的技能清单里出现这三个名字，或 `ls "$DSH_HOME/skills/"`。
