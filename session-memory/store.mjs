@@ -91,7 +91,7 @@ export function likePattern(value) {
 }
 
 /**
- * 工作区标记：把长路径归一成"项目"粒度 —— `ohos/dsh-harmonyos-app`、`java/jincai-ui`、`python`。
+ * 工作区标记：把长路径归一成"项目"粒度 —— `ohos/<应用>`、`java/<服务>`、`python`。
  * 本机会话的 cwd 都形如 `.../Documents/git/<相对路径>`，所以取 `git/` 之后的部分。
  *
  * 为什么要归一而不是直接用整条 cwd：

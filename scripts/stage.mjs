@@ -14,7 +14,7 @@
  *   node scripts/stage.mjs <版本> [--out-dir <目录>] [--no-build]
  *
  * 为什么固化这一步：**dsh 一有改动先外挂试跑、内置包当安全网**
- * （内置包换错 = 装完壳起不来，而 dsh 起不来时没法自救）。详见壳仓库
+ * （内置包换错 = 装完壳起不来，而 dsh 起不来时没法自救）。详见 HMDSH 侧
  * `skills/dsh-upgrade/SKILL.md` 的「出包与试跑」。
  */
 import { execFileSync } from 'node:child_process'

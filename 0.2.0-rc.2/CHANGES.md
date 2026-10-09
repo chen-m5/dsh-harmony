@@ -1,8 +1,7 @@
 # dsh 改造记录（0.2.0-rc.2）
 
 > **本文件是 dsh 侧改造的权威清单。** 只记 **dsh 本身**的改动，不涉及承载它的鸿蒙壳（HMDSH）。
-> 壳侧内容（ArkTS、运行时、会话/设置 UI、打出 hap）在壳仓库：
-> <https://gitcode.com/chen-qiongmeng/dsh-harmonyos-app>。
+> 壳侧内容（ArkTS、运行时、会话/设置 UI、打出 hap）由 **HMDSH** 负责，不在本仓库。
 >
 > **升级 dsh 版本时**：先读 [`docs/dsh-upgrade/SKILL.md`](docs/dsh-upgrade/SKILL.md)
 > —— **壳侧**的适配与实测流程（含验收 7 步）；原为沙箱里的 `dsh-upgrade` skill，
@@ -176,7 +175,7 @@ node scripts/build-dsh.mjs 0.2.0-rc.2 --clean          # 清中间产物（work/
 - **0.2.0-rc.2 追加三（2026-09-30）**：把「目录选择器根限制」**从本仓库移到壳**（原第 9 项删除，改造数 14 → 13）。
   理由：那条限制的动机只来自"被应用托管" —— 避免用户一路选到沙箱内部那些看不见的路径；
   开源出去的包不需要它。现在**壳在打包时**用 `scripts/apply-dsh-patches.sh` 把补丁注入内置 zip
-  （见壳仓库 `scripts/dsh-patches/`），本仓库的包跟随上游行为。
+  （见 HMDSH 侧的 `scripts/dsh-patches/`），本仓库的包跟随上游行为。
 
 - **0.2.0-rc.2 追加二（2026-09-30）**：新增**第 14 项**改造 —— `credentials-local` 的 owner-only
   检查豁免 `openharmony`（共享盘固定 660、`chmod 600` 不生效，原来会直接卡住启动）。

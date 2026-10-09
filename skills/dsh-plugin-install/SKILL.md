@@ -10,7 +10,7 @@ description: 给 dsh（HarmonyOS 壳）装/更新 skill 或插件时要走的流
 
 > **这个 skill 自己装在用户目录**（不是随包注入）：`<沙箱>/files/dsh-home/skills/dsh-plugin-install/`
 > —— 也就是 dsh 的 **user-dsh 根**（`$DSH_HOME/skills`，rank 400）。
-> **2026-10-10 起壳仓库不再保留 `skills/` 副本** —— 这份 `$DSH_HOME/skills/dsh-plugin-install/` 就是权威源本身。
+> **2026-10-10 起 HMDSH 内不再保留 `skills/` 副本** —— 这份 `$DSH_HOME/skills/dsh-plugin-install/` 就是权威源本身。
 >
 > ```sh
 > 要在别的机器上复现：直接把本目录拷进新机器的 `$DSH_HOME/skills/` 即可（放进去就生效，不用重启）。
@@ -37,7 +37,7 @@ description: 给 dsh（HarmonyOS 壳）装/更新 skill 或插件时要走的流
   只增改 + **只删自己放过的文件**（记账在 `files/skills/.dsh-mirrored`），手工塞进去的不碰。
 - 两种落地方式：
   - **仓库分发（推荐）**：放 dsh-harmony 仓库的 `skills/`，用户侧 `cp` 到 `$DSH_HOME/skills/` —— 改 skill 不必重打 hap（见该仓库 `HMDSH.md`）
-  - **随包注入（仅"必须跟 hap 分发"的 skill）**：放进壳仓库 `entry/src/main/resources/rawfile/skills/<名字>/`，由壳镜像到 `<沙箱>/files/skills/`
+  - **随包注入（仅"必须跟 hap 分发"的 skill）**：放进 HMDSH 应用的 `entry/src/main/resources/rawfile/skills/<名字>/`（改它要重打 HMDSH），由壳镜像到 `<沙箱>/files/skills/`
     → `scripts/build-hap.sh` → 装 hap → 重启。
   - **只在本机试**：直接写到 `<沙箱>/files/skills/<名字>/`（持久目录）→ 重启 dsh 即可；
     但它不在包里，换机/清数据就没了，也不会被 `.dsh-mirrored` 记账。

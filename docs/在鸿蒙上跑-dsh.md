@@ -312,4 +312,4 @@ localStorage.setItem("dsh.accountUi", "1");        // 关闭：localStorage.remo
 ⚠ 另一种临时方式是在地址栏追加 `?dshAccountUi=1`，但**必须"先打开 dsh 页面、再在当前地址栏追加"** ——
 直接把带参数的完整 URL 粘进新标签页，会被 dsh 启动时的那次跳转把 query 丢掉，等于没加。
 
-更详细的前因后果见 HMDSH 壳仓库的 `docs/账号登录.md`（§三之三）。
+更详细的前因后果见 HMDSH 侧的 `docs/账号登录.md`（§三之三）。

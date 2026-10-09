@@ -231,7 +231,7 @@ for (const entry of ['bin', 'node_modules']) {
   if (existsSync(p)) cpSync(p, join(stage, PKG_DIR_NAME, entry), { recursive: true })
 }
 // 包目录里的版本号文件：壳的「外挂包」读它把版本号显示出来（内置包有编译期常量，但保持一致；
-// 约定见壳仓库 PkgVersion.ets 的 PKG_VERSION_FILE）
+// 约定见 HMDSH 侧的 PkgVersion.ets 的 PKG_VERSION_FILE）
 writeFileSync(join(stage, PKG_DIR_NAME, 'VERSION'), `${version}\n`);
 // 命令行入口 bin/dsh：让这个包在鸿蒙的**终端里能直接跑**（不依赖 HMDSH 壳）。
 // 三个环境坑都固化进脚本，免得每次手敲：

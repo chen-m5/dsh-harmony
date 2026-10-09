@@ -7,8 +7,8 @@
 补丁从 dsh 包目录（即含 `node_modules/@deepseek-ai/…` 的那层）用 `git apply -p1` 应用。
 **现行打包流程不重放它们** —— 用的是 [`../files/`](../files) 里的整文件替换；
 本目录只留「当初是怎么改的」这个视角，内容说明以 [`../CHANGES.md`](../CHANGES.md)（权威）为准，
-升级用的自包含副本在壳仓库
-[`skills/dsh-upgrade/reference.md`](https://gitcode.com/chen-qiongmeng/dsh-harmonyos-app/blob/master/skills/dsh-upgrade/reference.md)。
+升级用的自包含副本在本仓库
+[`docs/dsh-upgrade/reference.md`](../../docs/dsh-upgrade/reference.md)。
 
 | 补丁 | 改造项（CHANGES 2.2） | 改了什么 | 状态 |
 |---|---|---|---|

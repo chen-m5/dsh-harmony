@@ -55,7 +55,7 @@ description: 把某个版本的 dsh 适配到 HarmonyOS（openharmony-arm64）�
    （校验官方树 → 替换 → 资产 → `bin` → 打包 → 自检）。
 5. **验收**（见下，必做）。
 6. **写说明并同步**：`<新版本>/CHANGES.md` 按本次实际改动重写（别沿用上一版）；
-   本 skill 的 `reference.md` 同步更新；**在壳仓库跑 `sh scripts/check-dsh-docs.sh`** 确认
+   本 skill 的 `reference.md` 同步更新；**在 HMDSH 侧跑 `sh scripts/check-dsh-docs.sh`** 确认
    「manifest ↔ 两份文档 ↔ 壳版本」一致（版本在 `entry/src/main/ets/common/PkgVersion.ets` 的 `DSH_VERSION` 一行）。
 
 ## 验收（必做，别只看「改完文件」）
