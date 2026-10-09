@@ -58,6 +58,7 @@ scripts/                    顶层：**共用件**
   plugins/                  ★ 新增/替换的 dsh 插件（每插件一目录 + plugins.json）
   CHANGES.md                ★ 这个版本改了什么、为什么
 session-memory/             **可选组件**（不参与打包）：dsh 的跨会话检索 —— MCP 工具 + 使用纪律 skill
+HMDSH.md                    **壳（HMDSH）使用说明**：装与起、该装哪几个 skill、为什么它们不随包
 ```
 
 约定：**每个版本自带独立脚本**；确实共用的东西放顶层 `scripts/`，其它版本要用就 **import 它的路径（引用，而不是复制）**。
