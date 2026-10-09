@@ -4,12 +4,9 @@
 > 壳侧内容（ArkTS、运行时、会话/设置 UI、打出 hap）在壳仓库：
 > <https://gitcode.com/chen-qiongmeng/dsh-harmonyos-app>。
 >
-> **升级 dsh 版本时**：先读壳仓库的
-> [`skills/dsh-upgrade/SKILL.md`](https://gitcode.com/chen-qiongmeng/dsh-harmonyos-app/blob/master/skills/dsh-upgrade/SKILL.md)
-> （流程与验收 7 步），再回来逐条核对本文件；
-> 其中「改造清单」一节在壳侧有一份**升级用的自包含副本**
-> [`skills/dsh-upgrade/reference.md`](https://gitcode.com/chen-qiongmeng/dsh-harmonyos-app/blob/master/skills/dsh-upgrade/reference.md)
-> —— **改这里就要同步改那里**（同步检查：壳仓库 `sh scripts/check-dsh-docs.sh`）。
+> **升级 dsh 版本时**：先读 **`dsh-upgrade` skill**（装在沙箱 `$DSH_HOME/skills/dsh-upgrade/`；
+> 2026-10-10 起壳仓库不再保留 `skills/` 副本），按它的流程与验收 7 步走，再回来逐条核对本文件。
+> **本文件就是权威清单**（壳侧 `scripts/check-dsh-docs.sh` 现在只比对本文件）。
 
 | 项 | 值 |
 |---|---|
