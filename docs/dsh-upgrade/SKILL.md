@@ -13,13 +13,9 @@ description: 把某个版本的 dsh 适配到 HarmonyOS（openharmony-arm64）�
 
 # 适配 / 升级 dsh（HarmonyOS）
 
-> **这个 skill 不随包**：**2026-10-10 起壳仓库不再保留 `skills/` 副本**，权威源就是这份 `$DSH_HOME/skills/dsh-upgrade/`
-> （user-dsh 根，rank 400；本壳里是 `<沙箱>/files/dsh-home/skills/`）—— dsh 监视这个根，
-> **放进去就生效，不用重启**：
->
-```sh
-> 要在别的机器上复现：把本目录拷进新机器的 `$DSH_HOME/skills/` 即可（rank 400，实时生效）。
-> ```
+> **来源说明**：本文件原为沙箱用户级 skill `dsh-upgrade`，放在 `$DSH_HOME/skills/dsh-upgrade/`
+> （user-dsh 根，rank 400；dsh 监视这个根，**放进去即时生效**）。2026-10-10 起从运行时移除、
+> 归档到此，作为**壳侧升级流程**的参考 —— dsh 侧的改造清单权威文件仍是 `<版本>/CHANGES.md`。
 
 
 把一个版本的 dsh 改到能在鸿蒙上跑起来：**取新版 → 按改造清单适配 → 产出包 → 另起进程实测**。
