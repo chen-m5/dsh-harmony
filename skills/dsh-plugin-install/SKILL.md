@@ -1,6 +1,6 @@
 ---
 name: dsh-plugin-install
-description: 给 dsh（HarmonyOS 壳）装/更新 skill 或插件时要走的流程：先导出用户目录（留退路）→ 装 → 重启 dsh 验证 → 失败则用导出归档导入回滚并做失败现场包。判断「这是 skill 还是插件」、两条安装路径（随包注入 / 打进 dsh 包）、校验清单与常见坑，以及起不来时怎么把现场交给 AI 分析。当用户说「装个 skill / 装个插件 / 加个能力」或装完 dsh 起不来时阅读。
+description: 给 dsh（HarmonyOS 壳）装/更新 skill 或插件时要走的流程：先导出用户目录（留退路）→ 装 → 重启 dsh 验证 → 失败则用导出归档导入回滚并做失败现场包。判断「这是 skill 还是插件」、安装路径（仓库分发 / 随包注入 / 打进 dsh 包）、校验清单与常见坑，以及起不来时怎么把现场交给 AI 分析。当用户说「装个 skill / 装个插件 / 加个能力」或装完 dsh 起不来时阅读。
 ---
 
 > **职责边界**：dsh 侧的改造与打包在 [dsh-harmony](https://gitcode.com/chen-qiongmeng/dsh-harmony) 仓库（每版独立的 `scripts/`）；
@@ -36,7 +36,8 @@ description: 给 dsh（HarmonyOS 壳）装/更新 skill 或插件时要走的流
 - 清单由构建脚本生成（`rawfile/skills/manifest.txt`），壳按「清单 ∪ 递归发现」同步；
   只增改 + **只删自己放过的文件**（记账在 `files/skills/.dsh-mirrored`），手工塞进去的不碰。
 - 两种落地方式：
-  - **随包（推荐，可分发/重装还在）**：放进仓库 `entry/src/main/resources/rawfile/skills/<名字>/`
+  - **仓库分发（推荐）**：放 dsh-harmony 仓库的 `skills/`，用户侧 `cp` 到 `$DSH_HOME/skills/` —— 改 skill 不必重打 hap（见该仓库 `HMDSH.md`）
+  - **随包注入（仅"必须跟 hap 分发"的 skill）**：放进壳仓库 `entry/src/main/resources/rawfile/skills/<名字>/`，由壳镜像到 `<沙箱>/files/skills/`
     → `scripts/build-hap.sh` → 装 hap → 重启。
   - **只在本机试**：直接写到 `<沙箱>/files/skills/<名字>/`（持久目录）→ 重启 dsh 即可；
     但它不在包里，换机/清数据就没了，也不会被 `.dsh-mirrored` 记账。

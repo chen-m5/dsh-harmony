@@ -23,7 +23,7 @@ description: 你（dsh）运行在一个 HarmonyOS 应用的沙箱里，而不�
 | **内置件**（壳自带的运行时） | `<沙箱>/files/<名字>/` | **只有 node 与 pnpm**，直接放 HOME 下（不套中间层），见下节 |
 | harmonybrew 装的东西 | `<沙箱>/files/.harmonybrew` | 用 `harmonybrew` skill 按需装的；壳不管它 |
 | dsh 包目录 | `<沙箱>/files/dsh-pkg/`（固定） | 内置 zip 解压而来；换包按**内置包编码**（zip 的 sha256）自动重解压；**不再是只读**（历史版本设过 a-w，现已取消） |
-| 随包 skill 根 | `<沙箱>/files/skills` | 见下节 `DSH_BUNDLED_SKILL_DIR` |
+| 随包 skill 根（**2026-10-10 起为空**） | `<沙箱>/files/skills` | 现在所有 skill 都走上面的用户级目录；这里只放"必须跟 hap 分发"的 skill（改它要重打 hap），见下节 `DSH_BUNDLED_SKILL_DIR` |
 | 壳自己的包装脚本 | `<沙箱>/files/bin`（`pnpm`/`pnpx`） | 排在 `PATH` 最前面 |
 | 壳生成的配置 | `<沙箱>/files/etc`（目前是 `gitconfig`） | 见 `GIT_CONFIG_SYSTEM` |
 | 你的日志 | `<沙箱>/files/logs/dsh.log` | **只在沙箱**；用户可在壳里"导出日志" |
@@ -42,7 +42,7 @@ description: 你（dsh）运行在一个 HarmonyOS 应用的沙箱里，而不�
 
 **已装好一批常用工具（`git` / `python3` / `curl` / `jq` / `rg` …，见第三节清单）；要装清单之外的（`fd`、`nc` 之类）**，两条路：
 
-1. **装 harmonybrew（一次能装一批）** —— 见随包 skill `harmonybrew`。规矩是
+1. **装 harmonybrew（一次能装一批）** —— 见 `harmonybrew` skill。规矩是
    **先看装没装（`$HOME/.harmonybrew/bin/brew`）、没装要先问用户**（首次下载约 122 MB）；
    东西落在 `<沙箱>/files/.harmonybrew`。⚠ `brew install` 自己要用 curl 下 bottle —— 壳里有 `curl`
    （8.8.0，`/usr/bin/curl`），够用（详见那个 skill 的「下载器」一节）。
@@ -73,7 +73,7 @@ harmonybrew 的 prefix（`files/.harmonybrew`）也因此更短。
   再在 `<沙箱>/files/bin/` 放个一行包装脚本指过去（pnpm / pnpx 就是这么干的）。
 - 挑东西时记住这里是 **openharmony-arm64 + musl**：优先**纯 JS（用自带的 node 跑）**、静态链接的二进制，
   或 `scripts/build-git-tools.mjs` 那种「自己把 ELF 依赖闭包带上」的做法；**glibc 的动态二进制直接跑不起来**。
-- **想一次装一批工具**：用 harmonybrew（brew）—— 见随包 skill `harmonybrew`。它的规矩是：
+- **想一次装一批工具**：用 harmonybrew（brew）—— 见 `harmonybrew` skill。它的规矩是：
   先看装没装（`$HOME/.harmonybrew/bin/brew`），**没装要先问用户**（首次下载约 122 MB）再动手。
 - **弄完顺手记账**：写一个自己的 skill（`$DSH_HOME/skills/<名字>/SKILL.md`，就是平时装 skill 的那个
   用户级目录）说明「是什么、装在哪、怎么用」；若它是随包内置的，改这份 `dsh-shell` skill 更合适。
